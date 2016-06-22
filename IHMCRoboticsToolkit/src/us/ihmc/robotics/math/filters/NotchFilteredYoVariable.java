@@ -19,19 +19,20 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
    private final double dt;
    private final DoubleYoVariable naturalFrequency;
    private final DoubleYoVariable dampingRatio;
-   private final DoubleYoVariable currentInput;
+   private final DoubleYoVariable inputVariable;
    protected final BooleanYoVariable hasBeenCalled;
    private final DoubleYoVariable[] input;
    private final DoubleYoVariable[] output;
    private final double a[];
    private final double b[];
 
-   private NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyHz, double dampingRatio)
+   public NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyHz, double dampingRatio)
    {
       this(name, registry, dt, naturalFrequencyHz, dampingRatio, null);
    }
 
-   private NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyHz, double dampingRatio, DoubleYoVariable positionVariable)
+   public NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyHz, double dampingRatio,
+         DoubleYoVariable inputVariable)
    {
       super(name, registry);
       this.dt = dt;
@@ -40,7 +41,7 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
       this.naturalFrequency.set(naturalFrequencyHz);
       this.dampingRatio = new DoubleYoVariable(name + "PolePairRadius", registry);
       this.dampingRatio.set(dampingRatio);
-      this.currentInput = positionVariable;
+      this.inputVariable = inputVariable;
       this.input = new DoubleYoVariable[3];
       this.output = new DoubleYoVariable[3];
       this.a = new double[3];
@@ -61,13 +62,13 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
 
    public void update()
    {
-      if (currentInput == null)
+      if (inputVariable == null)
       {
-         throw new NullPointerException("YoNotchFilteredVariable must be constructed with a non null "
-               + "position variable to call update(), otherwise use update(double)");
+         throw new NullPointerException(
+               "YoNotchFilteredVariable must be constructed with a non null " + "position variable to call update(), otherwise use update(double)");
       }
 
-      update(currentInput.getDoubleValue());
+      update(inputVariable.getDoubleValue());
    }
 
    public void update(double currentInputValue)
@@ -105,13 +106,13 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
 
    public void setNaturalFrequency(double naturalFrequencyHz)
    {
-      this.naturalFrequency.set(Math.min(Math.max(naturalFrequencyHz, 0), 2 / dt));
+      this.naturalFrequency.set(Math.min(Math.max(naturalFrequencyHz, 0), 1.0 / (2.0 * dt)));
       computeCoefficients();
    }
 
    public void setDampingRatio(double dampingRatio)
    {
-      this.dampingRatio.set(Math.min(Math.max(dampingRatio, 0), 2 / dt));
+      this.dampingRatio.set(Math.min(Math.max(dampingRatio, 0), 1.0 / (2.0 * dt)));
       computeCoefficients();
    }
 
@@ -131,19 +132,5 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
       a[0] = 4 / (dt * dt) + 4 / dt * xi * omega + omega * omega;
       a[1] = 2 * omega * omega - 8 / (dt * dt);
       a[2] = 4 / (dt * dt) - 4 / dt * xi * omega + omega * omega;
-   }
-
-   public static void main(String[] args)
-   {
-      double dt = 0.001;
-      DoubleYoVariable input = new DoubleYoVariable("input", new YoVariableRegistry(""));
-      NotchFilteredYoVariable output = new NotchFilteredYoVariable("output", new YoVariableRegistry(""), dt, 1, 1, input);
-
-      for (double i = 0; i < 1000; i++)
-      {
-         input.set(Math.sin(2 * Math.PI * i * dt));
-         output.update();
-         System.out.println(output.getDoubleValue());
-      }
    }
 }
