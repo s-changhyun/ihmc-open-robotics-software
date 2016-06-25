@@ -17,10 +17,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 public class NotchFilteredYoVariable extends DoubleYoVariable implements ProcessingYoVariable
 {
    private final double dt;
-   private final DoubleYoVariable naturalFrequency;
-   private final DoubleYoVariable dampingRatio;
-   private final DoubleYoVariable inputVariable;
+   private final NotchFilteredYoVariableParameters parameters;
    protected final BooleanYoVariable hasBeenCalled;
+   private final DoubleYoVariable inputVariable;
    private final DoubleYoVariable[] input;
    private final DoubleYoVariable[] output;
    private final double a[];
@@ -28,19 +27,27 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
 
    public NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyHz, double dampingRatio)
    {
-      this(name, registry, dt, naturalFrequencyHz, dampingRatio, null);
+      this(name, registry, dt, new NotchFilteredYoVariableParameters(name, registry, naturalFrequencyHz, dampingRatio), null);
+   }
+
+   public NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, NotchFilteredYoVariableParameters parameters)
+   {
+      this(name, registry, dt, parameters, null);
    }
 
    public NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyHz, double dampingRatio,
          DoubleYoVariable inputVariable)
    {
+      this(name, registry, dt, new NotchFilteredYoVariableParameters(name, registry, naturalFrequencyHz, dampingRatio), inputVariable);
+   }
+
+   public NotchFilteredYoVariable(String name, YoVariableRegistry registry, double dt, NotchFilteredYoVariableParameters parameters,
+         DoubleYoVariable inputVariable)
+   {
       super(name, registry);
       this.dt = dt;
+      this.parameters = parameters;
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-      this.naturalFrequency = new DoubleYoVariable(name + "NaturalFrequency", registry);
-      this.naturalFrequency.set(naturalFrequencyHz);
-      this.dampingRatio = new DoubleYoVariable(name + "PolePairRadius", registry);
-      this.dampingRatio.set(dampingRatio);
       this.inputVariable = inputVariable;
       this.input = new DoubleYoVariable[3];
       this.output = new DoubleYoVariable[3];
@@ -106,13 +113,13 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
 
    public void setNaturalFrequency(double naturalFrequencyHz)
    {
-      this.naturalFrequency.set(Math.min(Math.max(naturalFrequencyHz, 0), 1.0 / (2.0 * dt)));
+      parameters.getNaturalFrequency().set(Math.min(Math.max(naturalFrequencyHz, 0), 1.0 / (2.0 * dt)));
       computeCoefficients();
    }
 
    public void setDampingRatio(double dampingRatio)
    {
-      this.dampingRatio.set(Math.min(Math.max(dampingRatio, 0), 1.0 / (2.0 * dt)));
+      parameters.getDampingRatio().set(Math.max(dampingRatio, 0));
       computeCoefficients();
    }
 
@@ -123,8 +130,8 @@ public class NotchFilteredYoVariable extends DoubleYoVariable implements Process
 
    private void computeCoefficients()
    {
-      double omega = 2 * Math.PI * naturalFrequency.getDoubleValue();
-      double xi = dampingRatio.getDoubleValue();
+      double omega = 2 * Math.PI * parameters.getNaturalFrequency().getDoubleValue();
+      double xi = parameters.getDampingRatio().getDoubleValue();
 
       b[0] = 4 / (dt * dt) + omega * omega;
       b[1] = 2 * omega * omega - 8 / (dt * dt);

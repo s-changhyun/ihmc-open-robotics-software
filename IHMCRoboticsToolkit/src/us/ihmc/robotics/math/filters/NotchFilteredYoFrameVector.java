@@ -24,46 +24,34 @@ public class NotchFilteredYoFrameVector extends YoFrameVector implements Process
    public static NotchFilteredYoFrameVector createNotchFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
          double naturalFrequencyHz, double dampingRatio, ReferenceFrame referenceFrame)
    {
-      NotchFilteredYoVariable x, y, z;
-      x = new NotchFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz, dampingRatio);
-      y = new NotchFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz, dampingRatio);
-      z = new NotchFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz, dampingRatio);
-      return new NotchFilteredYoFrameVector(x, y, z, referenceFrame);
+      NotchFilteredYoVariableParameters parameters = new NotchFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyHz, dampingRatio);
+      return createNotchFilteredYoFrameVector(namePrefix, nameSuffix, registry, dt, parameters, referenceFrame);
    }
 
    public static NotchFilteredYoFrameVector createNotchFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
-         double[] naturalFrequencyHz, double[] dampingRatio, ReferenceFrame referenceFrame)
+         NotchFilteredYoVariableParameters parameters, ReferenceFrame referenceFrame)
    {
       NotchFilteredYoVariable x, y, z;
-      x = new NotchFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz[0], dampingRatio[0]);
-      y = new NotchFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz[1], dampingRatio[1]);
-      z = new NotchFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz[2], dampingRatio[2]);
+      x = new NotchFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, parameters);
+      y = new NotchFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, dt, parameters);
+      z = new NotchFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, dt, parameters);
       return new NotchFilteredYoFrameVector(x, y, z, referenceFrame);
    }
 
    public static NotchFilteredYoFrameVector createNotchFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
          double naturalFrequencyHz, double dampingRatio, YoFrameVector unfilteredVector)
    {
-      NotchFilteredYoVariable x, y, z;
-      x = new NotchFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz, dampingRatio,
-            unfilteredVector.getYoX());
-      y = new NotchFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz, dampingRatio,
-            unfilteredVector.getYoY());
-      z = new NotchFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz, dampingRatio,
-            unfilteredVector.getYoZ());
-      return new NotchFilteredYoFrameVector(x, y, z, unfilteredVector.getReferenceFrame());
+      NotchFilteredYoVariableParameters parameters = new NotchFilteredYoVariableParameters(namePrefix + nameSuffix, registry, naturalFrequencyHz, dampingRatio);
+      return createNotchFilteredYoFrameVector(namePrefix, nameSuffix, registry, dt, parameters, unfilteredVector);
    }
 
    public static NotchFilteredYoFrameVector createNotchFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double dt,
-         double[] naturalFrequencyHz, double[] dampingRatio, YoFrameVector unfilteredVector)
+         NotchFilteredYoVariableParameters parameters, YoFrameVector unfilteredVector)
    {
       NotchFilteredYoVariable x, y, z;
-      x = new NotchFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz[0], dampingRatio[0],
-            unfilteredVector.getYoX());
-      y = new NotchFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz[1], dampingRatio[1],
-            unfilteredVector.getYoY());
-      z = new NotchFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, dt, naturalFrequencyHz[2], dampingRatio[2],
-            unfilteredVector.getYoZ());
+      x = new NotchFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, dt, parameters, unfilteredVector.getYoX());
+      y = new NotchFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, dt, parameters, unfilteredVector.getYoY());
+      z = new NotchFilteredYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry, dt, parameters, unfilteredVector.getYoZ());
       return new NotchFilteredYoFrameVector(x, y, z, unfilteredVector.getReferenceFrame());
    }
 
