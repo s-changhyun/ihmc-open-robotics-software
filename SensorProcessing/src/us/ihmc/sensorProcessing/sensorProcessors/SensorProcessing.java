@@ -29,13 +29,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.robotics.math.filters.ProcessingYoVariable;
-import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
+import us.ihmc.robotics.math.filters.*;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -557,6 +551,153 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          AlphaFilteredYoVariable filter = new AlphaFilteredYoVariable(prefix + suffix, registry, alphaFilter, intermediateJointSignal);
          processedJointSignals.get(oneDoFJoint).add(filter);
          
+         if (!forVizOnly)
+            outputJointSignals.put(oneDoFJoint, filter);
+      }
+
+      return processorsIDs;
+   }
+
+   /**
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param filterParameters notch filter parameters.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public Map<String, Integer> addSensorNotchFilter(NotchFilteredYoVariableParameters filterParameters, boolean forVizOnly, SensorType sensorType)
+   {
+      return addSensorNotchFilterWithSensorsToIgnore(filterParameters, forVizOnly, sensorType);
+   }
+
+   /**
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param filterParameters notch filter parameters.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param sensorsToBeProcessed list of the names of the sensors that need to be processed.
+    */
+   public Map<String, Integer> addSensorNotchFilterOnlyForSpecifiedSensors(NotchFilteredYoVariableParameters filterParameters, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
+   {
+      return addSensorNotchFilterWithSensorsToIgnore(filterParameters, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
+   }
+
+   /**
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
+    * @param filterParameters notch filter parameters.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param sensorsToIgnore list of the names of the sensors to ignore.
+    */
+   public Map<String, Integer> addSensorNotchFilterWithSensorsToIgnore(NotchFilteredYoVariableParameters filterParameters, boolean forVizOnly, SensorType sensorType, String... sensorsToIgnore)
+   {
+      Map<String, Integer> processorIDMap;
+      List<String> sensorToIgnoreList = new ArrayList<>();
+      if (sensorsToIgnore != null && sensorsToIgnore.length > 0)
+         sensorToIgnoreList.addAll(Arrays.asList(sensorsToIgnore));
+
+      if (sensorType.isJointSensor())
+         processorIDMap = addJointNotchFilterWithJointsToIgnore(filterParameters, forVizOnly, sensorType, sensorToIgnoreList);
+      else if (sensorType.isWrenchSensor())
+         processorIDMap = addForceSensorNotchFilterWithSensorsToIgnore(filterParameters, forVizOnly, sensorType, sensorToIgnoreList);
+      else if (sensorType.isIMUSensor())
+      {
+         if (sensorType == SensorType.IMU_ORIENTATION)
+            throw new RuntimeException("Unsupported type of sensor.");
+         else
+            processorIDMap = addIMUVectorTypeDataNotchFilter(filterParameters, forVizOnly, sensorType, sensorToIgnoreList);
+      }
+      else
+         throw new RuntimeException("Unknown type of sensor.");
+
+      return Collections.unmodifiableMap(processorIDMap);
+   }
+
+   private Map<String, Integer> addIMUVectorTypeDataNotchFilter(NotchFilteredYoVariableParameters filterParameters, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
+   {
+      Map<String, Integer> processorsIDs = new HashMap<>();
+
+      LinkedHashMap<IMUDefinition, YoFrameVector> intermediateIMUVectorTypeSignals = getIntermediateIMUVectorTypeSignals(sensorType);
+      LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedIMUVectorTypeSignals = getProcessedIMUVectorTypeSignals(sensorType);
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
+         String imuName = imuDefinition.getName();
+
+         if (sensorsToIgnore.contains(imuName))
+            continue;
+
+         YoFrameVector intermediateSignal = intermediateIMUVectorTypeSignals.get(imuDefinition);
+         List<ProcessingYoVariable> processors = processedIMUVectorTypeSignals.get(imuDefinition);
+         String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
+         int newProcessorID = processors.size();
+         processorsIDs.put(imuName, newProcessorID);
+         String suffix = sensorType.getProcessorNameSuffix(imuName, newProcessorID);
+         NotchFilteredYoFrameVector filter = NotchFilteredYoFrameVector.createNotchFilteredYoFrameVector(prefix, suffix, registry, updateDT, filterParameters, intermediateSignal);
+         processors.add(filter);
+
+         if (!forVizOnly)
+            intermediateIMUVectorTypeSignals.put(imuDefinition, filter);
+      }
+
+      return processorsIDs;
+   }
+
+   private Map<String, Integer> addForceSensorNotchFilterWithSensorsToIgnore(NotchFilteredYoVariableParameters filterParameters, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
+   {
+      Map<String, Integer> processorsIDs = new HashMap<>();
+
+      LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateForceSensorSignals = getIntermediateForceSensorSignals(sensorType);
+      LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedForceSensorSignals = getProcessedForceSensorSignals(sensorType);
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
+         String sensorName = forceSensorDefinition.getSensorName();
+
+         if (sensorsToIgnore.contains(sensorName))
+            continue;
+
+         YoFrameVector intermediateSignal = intermediateForceSensorSignals.get(forceSensorDefinition);
+         List<ProcessingYoVariable> processors = processedForceSensorSignals.get(forceSensorDefinition);
+         String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
+         int newProcessorID = processors.size();
+         processorsIDs.put(sensorName, newProcessorID);
+         String suffix = sensorType.getProcessorNameSuffix(sensorName, newProcessorID);
+         NotchFilteredYoFrameVector filter = NotchFilteredYoFrameVector.createNotchFilteredYoFrameVector(prefix, suffix, registry, updateDT, filterParameters, intermediateSignal);
+         processors.add(filter);
+
+         if (!forVizOnly)
+            intermediateForceSensorSignals.put(forceSensorDefinition, filter);
+      }
+
+      return processorsIDs;
+   }
+
+   private Map<String, Integer> addJointNotchFilterWithJointsToIgnore(NotchFilteredYoVariableParameters filterParameters, boolean forVizOnly, SensorType sensorType, List<String> jointsToIgnore)
+   {
+      Map<String, Integer> processorsIDs = new HashMap<>();
+
+      LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointSignals = getOutputJointSignals(sensorType);
+      LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointSignals = getProcessedJointSignals(sensorType);
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointsToIgnore.contains(jointName))
+            continue;
+
+         DoubleYoVariable intermediateJointSignal = outputJointSignals.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointSignals.get(oneDoFJoint);
+         String prefix = sensorType.getProcessorNamePrefix(ALPHA_FILTER);
+         int newProcessorID = processors.size();
+         processorsIDs.put(jointName, newProcessorID);
+         String suffix = sensorType.getProcessorNameSuffix(jointName, newProcessorID);
+         NotchFilteredYoVariable filter = new NotchFilteredYoVariable(prefix + suffix, registry, updateDT, filterParameters, intermediateJointSignal);
+         processedJointSignals.get(oneDoFJoint).add(filter);
+
          if (!forVizOnly)
             outputJointSignals.put(oneDoFJoint, filter);
       }
@@ -1090,6 +1231,18 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       DoubleYoVariable alphaFilter = new DoubleYoVariable(name, registry);
       alphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, updateDT));
       return alphaFilter;
+   }
+
+   /**
+    * Create a notch filter given a name, a natural frequency (in Hertz), and a damping ratio that will be registered in the {@code SensorProcessing}'s {@code YoVariableRegistry}.
+    * @param name name of the variable.
+    * @param naturalFrequency natural frequency in Hertz
+    * @param dampingRatio damping ratio
+    * @return a {@code DoubleYoVariable} to be used when adding a notch filter stage using the methods in this class such as {@link SensorProcessing#addJointVelocityAlphaFilter(DoubleYoVariable, boolean)}.
+    */
+   public NotchFilteredYoVariableParameters createNotchFilter(String name, double naturalFrequency, double dampingRatio)
+   {
+      return new NotchFilteredYoVariableParameters(name, registry, naturalFrequency, dampingRatio);
    }
 
    /**
