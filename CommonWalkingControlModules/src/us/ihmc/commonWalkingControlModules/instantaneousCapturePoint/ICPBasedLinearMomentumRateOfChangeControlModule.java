@@ -38,6 +38,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
 
    private final DenseMatrix64F linearAndAngularZSelectionMatrix = CommonOps.identity(6);
+   private final DenseMatrix64F linearNoHeightAndAngularZSelectionMatrix = CommonOps.identity(6);
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ICPProportionalController icpProportionalController;
@@ -119,6 +120,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
       MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
+      MatrixTools.removeRow(linearNoHeightAndAngularZSelectionMatrix, 0);
+      MatrixTools.removeRow(linearNoHeightAndAngularZSelectionMatrix, 0);
+      MatrixTools.removeRow(linearNoHeightAndAngularZSelectionMatrix, 3);
 
       if (yoGraphicsListRegistry != null)
       {
