@@ -17,12 +17,11 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -44,7 +43,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
-   private final YoVariableRegistry registry;
+   private final YoVariableRegistry registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
    
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
    
@@ -59,10 +58,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private boolean sendCorrectionUpdate = false;
    
    //Deadzone translation variables
-   private final DoubleYoVariable xDeadzoneSize;
-   private final DoubleYoVariable yDeadzoneSize;
-   private final DoubleYoVariable zDeadzoneSize;
-   private final DoubleYoVariable yawDeadzoneSize;
+   private final DoubleYoVariable xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);    
+   private final DoubleYoVariable yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry);    
+   private final DoubleYoVariable zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);    
+   private final DoubleYoVariable yawDeadzoneSize = new DoubleYoVariable("yawDeadzoneSize", registry);
 
    private final DoubleYoVariable alphaFilterBreakFrequency;
    
@@ -109,38 +108,29 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final BooleanYoVariable isErrorTooBig;
    private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
    
-   public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize)
-   {
-      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, null);
-   }
-
-   public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
-         PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize)
-   {
-      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber);
-   }
-   
-   public NewPelvisPoseHistoryCorrection(FloatingInverseDynamicsJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public NewPelvisPoseHistoryCorrection(FloatingInverseDynamicsJoint sixDofJoint, double estimatorDt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
          YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
-      
-      this.estimatorDT = estimatorDT;
+      this(sixDofJoint, null, estimatorDt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber);
+   }
+
+   public NewPelvisPoseHistoryCorrection(FloatingInverseDynamicsJoint sixDofJoint, StateEstimatorParameters stateEstimatorParameters, double estimatorDt, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+         YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+   {
+      this.estimatorDT = estimatorDt;
 
       this.rootJoint = sixDofJoint;
       this.pelvisReferenceFrame = rootJoint.getFrameAfterJoint();
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
-      this.registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
-      
-      xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);
-      xDeadzoneSize.set(X_DEADZONE_SIZE);
-      yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry);
-      yDeadzoneSize.set(Y_DEADZONE_SIZE);
-      zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);
-      zDeadzoneSize.set(Z_DEADZONE_SIZE);
-      yawDeadzoneSize = new DoubleYoVariable("yawDeadzoneSize", registry);
-      yawDeadzoneSize.set(Math.toRadians(YAW_DEADZONE_IN_DEGREES));
+
+      if(stateEstimatorParameters != null)
+      {
+         xDeadzoneSize.set(stateEstimatorParameters.getLocalizationCorrectionDeadbandX());
+         yDeadzoneSize.set(stateEstimatorParameters.getLocalizationCorrectionDeadbandY());
+         zDeadzoneSize.set(stateEstimatorParameters.getLocalizationCorrectionDeadbandZ());
+         yawDeadzoneSize.set(Math.toRadians(stateEstimatorParameters.getLocalizationCorrectionDeadbandYawInDegrees()));
+      }
       
       enableProcessNewPackets = new BooleanYoVariable("enableProcessNewPackets", registry);
       enableProcessNewPackets.set(true);

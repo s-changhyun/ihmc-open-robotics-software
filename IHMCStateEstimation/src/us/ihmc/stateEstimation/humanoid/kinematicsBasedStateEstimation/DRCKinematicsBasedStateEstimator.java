@@ -101,7 +101,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       }
 
       if(USE_NEW_PELVIS_POSE_CORRECTOR)
-         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, yoGraphicsListRegistry, 1000);
+         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure.getRootJoint(), stateEstimatorParameters, stateEstimatorParameters.getEstimatorDT(), registry, 1000, yoGraphicsListRegistry, null);
       else
          this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
 

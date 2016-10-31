@@ -160,4 +160,21 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    {
       return false;
    }
+   
+   public double getLocalizationCorrectionDeadbandX()
+   {
+      return 0.03;
+   }
+   public double getLocalizationCorrectionDeadbandY()
+   {
+      return 0.03;
+   }
+   public double getLocalizationCorrectionDeadbandZ()
+   {
+      return 0.02;
+   }
+   public double getLocalizationCorrectionDeadbandYawInDegrees()
+   {
+      return 1.0;
+   }
 }

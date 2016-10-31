@@ -375,4 +375,28 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    {
       return false;
    }
+   
+   @Override
+   public double getLocalizationCorrectionDeadbandX()
+   {
+      return ValkyrieLocalizationParameters.getXDeadband();
+   }
+   
+   @Override
+   public double getLocalizationCorrectionDeadbandY()
+   {
+      return ValkyrieLocalizationParameters.getYDeadband();
+   }
+   
+   @Override
+   public double getLocalizationCorrectionDeadbandZ()
+   {
+      return ValkyrieLocalizationParameters.getZDeadband();
+   }
+   
+   @Override
+   public double getLocalizationCorrectionDeadbandYawInDegrees()
+   {
+      return ValkyrieLocalizationParameters.getYawDeadbandInDegrees();
+   }
 }
