@@ -15,7 +15,7 @@ public class ValkyrieLocalizationParameters
 
    static
    {
-      File file = new File(System.getProperty("jointOffsetFile", defaultConfigFile));
+      File file = new File(System.getProperty("localizationConfigFile", defaultConfigFile));
       System.out.println("Loading Valkyrie Localization Parameters from " + file.getAbsolutePath());
 
       if (file.exists() && file.isFile())
