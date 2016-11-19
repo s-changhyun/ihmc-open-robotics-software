@@ -13,8 +13,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -25,8 +27,10 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -59,6 +63,8 @@ public class SupportState extends AbstractFootControlState
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+
    private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
    private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
 
@@ -150,6 +156,14 @@ public class SupportState extends AbstractFootControlState
       super.doTransitionIntoAction();
       FrameVector fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
+
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
+      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
+
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = fullRobotModel.getFoot(robotSide);
+      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
@@ -323,6 +337,7 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+      inverseDymamicsCommandsList.addCommand(privilegedConfigurationCommand);
       return inverseDymamicsCommandsList;
    }
 
