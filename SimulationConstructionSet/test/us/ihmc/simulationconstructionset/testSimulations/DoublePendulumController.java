@@ -1,11 +1,11 @@
 package us.ihmc.simulationconstructionset.testSimulations;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {
@@ -43,10 +43,10 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
 
    public void read(long currentClockTime)
    {
-      q_j1.set(doublePendulum.getJ1().getQ().getDoubleValue());
-      qd_j1.set(doublePendulum.getJ1().getQD().getDoubleValue());
-      q_j2.set(doublePendulum.getJ2().getQ().getDoubleValue());
-      qd_j2.set(doublePendulum.getJ2().getQD().getDoubleValue());
+      q_j1.set(doublePendulum.getJ1().getQYoVariable().getDoubleValue());
+      qd_j1.set(doublePendulum.getJ1().getQDYoVariable().getDoubleValue());
+      q_j2.set(doublePendulum.getJ2().getQYoVariable().getDoubleValue());
+      qd_j2.set(doublePendulum.getJ2().getQDYoVariable().getDoubleValue());
    }
 
    public void run()

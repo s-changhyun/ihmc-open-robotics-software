@@ -1,14 +1,14 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.EndToEndCinderBlockFieldTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
@@ -17,6 +17,12 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    public DRCRobotModel getRobotModel()
    {
       return robotModel;
+   }
+
+   @Override
+   public double getPelvisOffsetHeight()
+   {
+      return 0.09;
    }
 
    @Override

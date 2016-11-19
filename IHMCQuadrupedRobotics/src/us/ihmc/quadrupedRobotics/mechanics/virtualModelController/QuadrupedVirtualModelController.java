@@ -3,10 +3,13 @@ package us.ihmc.quadrupedRobotics.mechanics.virtualModelController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -23,15 +26,12 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelController
 {
    private final YoVariableRegistry registry;
 
-   private final SDFFullQuadrupedRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
@@ -64,7 +64,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
    private final FrameVector jointAxisTempVector = new FrameVector();
 
-   public QuadrupedVirtualModelController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
+   public QuadrupedVirtualModelController(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;

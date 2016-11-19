@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -72,6 +72,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract boolean allowAutomaticManipulationAbort();
 
    public abstract double getMinimumSwingTimeForDisturbanceRecovery();
+
+   /**
+    * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
+    */
+   public abstract boolean useOptimizationBasedICPController();
 
    public abstract double getICPErrorThresholdToSpeedUpSwing();
 
@@ -251,5 +256,15 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
    {
       return new String[0];
+   }
+
+   /**
+    * Returns a ratio to multiply the swing foot velocity adjustment when the swing trajectory is modified online.
+    * 0.0 will eliminate any velocity adjustment.
+    * 1.0 will make it try to move to the new trajectory in 1 dt.
+    */
+   public double getSwingFootVelocityAdjustmentDamping()
+   {
+      return 0.0;
    }
 }

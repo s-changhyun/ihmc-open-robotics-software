@@ -1,24 +1,24 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class PelvisOrientationTrajectoryTask extends BehaviorTask
+public class PelvisOrientationTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
 {
    private final PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage;
    private final PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior;
 
-   public PelvisOrientationTrajectoryTask(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage, DoubleYoVariable yoTime,
+   public PelvisOrientationTrajectoryTask(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage,
          PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior)
    {
-      this(pelvisOrientationTrajectoryMessage, yoTime, pelvisOrientationTrajectoryBehavior, 0.0);
+      this(null, pelvisOrientationTrajectoryMessage, pelvisOrientationTrajectoryBehavior);
    }
 
-   public PelvisOrientationTrajectoryTask(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage, DoubleYoVariable yoTime,
-         PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior, double sleepTime)
+   public PelvisOrientationTrajectoryTask(E stateEnum, PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage,
+         PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior)
    {
-      super(pelvisOrientationTrajectoryBehavior, yoTime, sleepTime);
+      super(stateEnum, pelvisOrientationTrajectoryBehavior);
       this.pelvisOrientationTrajectoryBehavior = pelvisOrientationTrajectoryBehavior;
       this.pelvisOrientationTrajectoryMessage = pelvisOrientationTrajectoryMessage;
    }

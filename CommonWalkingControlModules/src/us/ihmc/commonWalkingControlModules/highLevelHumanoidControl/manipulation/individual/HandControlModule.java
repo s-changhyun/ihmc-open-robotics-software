@@ -9,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
@@ -49,7 +50,6 @@ import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
 
 import javax.vecmath.Vector3d;

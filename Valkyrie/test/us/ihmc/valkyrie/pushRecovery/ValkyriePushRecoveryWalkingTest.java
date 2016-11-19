@@ -1,13 +1,13 @@
 package us.ihmc.valkyrie.pushRecovery;
 
-import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryWalkingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 {
    @Override

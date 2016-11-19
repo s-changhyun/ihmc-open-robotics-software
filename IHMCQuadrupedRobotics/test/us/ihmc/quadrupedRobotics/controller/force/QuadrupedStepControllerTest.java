@@ -14,12 +14,13 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobotTestInterface
 {
@@ -33,6 +34,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       
       try
       {
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -54,11 +56,11 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 200000)
    public void testTakingAStep()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       DoubleYoVariable frontLeftSolePositionX = (DoubleYoVariable) conductor.getScs().getVariable("frontLeftSolePositionX");
       double commandedStepPositionX = frontLeftSolePositionX.getDoubleValue() + 0.2;

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -19,7 +19,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeElapsed;
 
-   public PelvisTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
@@ -49,10 +49,10 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
 
    private void sendPelvisPosePacketToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingPelvisTrajectoryMessage.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingPelvisTrajectoryMessage);
+         sendPacket(outgoingPelvisTrajectoryMessage);
          sendPacketToController(outgoingPelvisTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
@@ -66,7 +66,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       hasPacketBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       hasBeenInitialized.set(true);
    }
@@ -78,23 +78,13 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       outgoingPelvisTrajectoryMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
    }
 
-   @Override //TODO: Not currently implemented for this behavior
-   public void stop()
-   {
-      isStopped.set(true);
-   }
 
-   @Override //TODO: Not currently implemented for this behavior
-   public void pause()
-   {
-      isPaused.set(true);
-   }
 
    @Override //TODO: Not currently implemented for this behavior
    public void resume()
@@ -114,24 +104,6 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return outgoingPelvisTrajectoryMessage != null;
-   }
+  
+  
 }

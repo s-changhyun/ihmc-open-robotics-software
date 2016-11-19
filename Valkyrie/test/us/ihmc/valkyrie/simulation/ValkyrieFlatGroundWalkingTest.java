@@ -2,33 +2,28 @@ package us.ihmc.valkyrie.simulation;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCFlatGroundWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 //This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-	@DeployableTestMethod(estimatedDuration = 273.1)
+	@ContinuousIntegrationTest(estimatedDuration = 273.1)
 	@Test(timeout = 1400000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
-
-      String runName = "ValkyrieFlatGroundWalkingTest";
       robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
-
-      boolean doPelvisYawWarmup = true;
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+      super.testFlatGroundWalking(robotModel, true);
    }
 
    @Override

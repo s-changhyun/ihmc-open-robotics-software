@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -22,7 +22,7 @@ public class QuadrupedLinkLengths
          ReferenceFrame legAttachmentFrame = quadrupedReferenceFrames.getLegAttachmentFrame(robotQuadrant);
          ReferenceFrame beforeHipPitchFrame = quadrupedReferenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.HIP_PITCH);
          ReferenceFrame hipPitchFrame = quadrupedReferenceFrames.getHipPitchFrame(robotQuadrant);
-         ReferenceFrame beforeKneePitchFrame = quadrupedReferenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.KNEE);
+         ReferenceFrame beforeKneePitchFrame = quadrupedReferenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.KNEE_PITCH);
          ReferenceFrame kneePitchFrame = quadrupedReferenceFrames.getKneeFrame(robotQuadrant);
          ReferenceFrame footFrame = quadrupedReferenceFrames.getFootFrame(robotQuadrant);
 

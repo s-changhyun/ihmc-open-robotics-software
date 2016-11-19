@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.17"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
   }
 }
 
@@ -30,7 +30,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
@@ -45,10 +45,9 @@ dependencies {
     compile group: 'org.ejml', name: 'simple', version: '0.28'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
 
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
-    compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-
+	
+	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")	
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 

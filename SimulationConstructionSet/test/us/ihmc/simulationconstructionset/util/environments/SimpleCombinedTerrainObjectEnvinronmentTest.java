@@ -7,21 +7,21 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.input.SelectedListener;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.DoNothingController;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleCombinedTerrainObjectEnvinronmentTest
 {
    private static boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(estimatedDuration = 2.0)
+	@ContinuousIntegrationTest(estimatedDuration = 2.0)
 	@Test(timeout=300000)
    public void testSimpleCombinedTerrainObjectEnvironment()
    {

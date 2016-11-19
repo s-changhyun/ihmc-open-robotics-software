@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,7 +18,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
 
-   public PelvisHeightTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisHeightTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       startTime = new DoubleYoVariable(getName() + "StartTime", registry);
@@ -46,11 +46,11 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
 
    private void sendMessageToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {      
          outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
          sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
-         sendPacketToNetworkProcessor(outgoingPelvisHeightTrajectoryMessage);
+         sendPacket(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getTrajectoryTime());
@@ -63,7 +63,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       hasInputBeenSet.set(false);
       trajectoryTimeElapsed.set(false);
@@ -83,26 +83,10 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
 
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -115,22 +99,8 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+   
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

@@ -14,12 +14,17 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
@@ -34,11 +39,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class OneStepCaptureRegionCalculatorTest
 {
@@ -55,7 +56,7 @@ public class OneStepCaptureRegionCalculatorTest
 
    @SuppressWarnings("unused")
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -67,7 +68,7 @@ public class OneStepCaptureRegionCalculatorTest
             ankleZUpFrames, registry, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testPointsInsideCaptureRegion()
    {
@@ -115,7 +116,7 @@ public class OneStepCaptureRegionCalculatorTest
 
       shrinker.shrinkConstantDistanceInto(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
 
-      assertTrue(shrunkenPolygon.getConvexPolygon2d().isCompletelyInside(captureRegion.getConvexPolygon2d()));
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(shrunkenPolygon.getConvexPolygon2d(), captureRegion.getConvexPolygon2d()));
 
       ArrayList<FramePoint2d> expectedPointsOutside = new ArrayList<FramePoint2d>();
       movePointsFactor = 1.03;
@@ -153,7 +154,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProjectedFootCorners()
    {
@@ -227,7 +228,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCalculationWithICPInFootPolygon()
    {
@@ -301,7 +302,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCalculationWithHighSwingTime()
    {

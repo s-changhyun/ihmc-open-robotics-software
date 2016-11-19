@@ -2,9 +2,9 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import java.util.BitSet;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -15,7 +15,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
  */
 public class QuadrupedForceBasedJointInitializationController implements QuadrupedController
 {
-   private final SDFFullQuadrupedRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}

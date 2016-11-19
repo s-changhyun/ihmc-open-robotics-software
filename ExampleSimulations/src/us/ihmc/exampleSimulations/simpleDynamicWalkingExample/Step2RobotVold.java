@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -158,7 +158,7 @@ public class Step2RobotVold extends Robot
    //*************************  Part 1
    public void setKneeForce(double desiredTauKnee)
    {
-      this.kneeJoint.tau.set(desiredTauKnee);
+      this.kneeJoint.setTau(desiredTauKnee);
    }
    
    public double getBodyPositionZ()
@@ -179,7 +179,7 @@ public class Step2RobotVold extends Robot
    
    public void setHipForce(double desiredTauHip)
    {
-      this.hipJoint.tau.set(desiredTauHip);
+      this.hipJoint.setTau(desiredTauHip);
    }
    
    public double getBodyPitchVel()

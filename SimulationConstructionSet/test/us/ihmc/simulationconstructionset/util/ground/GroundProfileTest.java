@@ -14,14 +14,14 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -29,8 +29,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class GroundProfileTest
 {
@@ -45,7 +45,7 @@ public abstract class GroundProfileTest
    public abstract double getMaxPercentageOfAllowablePeakPoints();
    public abstract double getMaxPercentageOfAllowableDropOffs();
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testSurfaceNormalGridForSmoothTerrainUsingHeightMap()
    {

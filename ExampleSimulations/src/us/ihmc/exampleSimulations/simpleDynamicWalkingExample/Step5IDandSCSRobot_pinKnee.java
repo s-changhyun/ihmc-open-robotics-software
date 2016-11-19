@@ -12,8 +12,8 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -338,8 +338,8 @@ public class Step5IDandSCSRobot_pinKnee extends Robot
       for (OneDoFJoint idJoint : idToSCSLegJointMap.keySet())
       {
          OneDegreeOfFreedomJoint scsJoint = idToSCSLegJointMap.get(idJoint);
-         idJoint.setQ(scsJoint.getQ().getDoubleValue());
-         idJoint.setQd(scsJoint.getQD().getDoubleValue());
+         idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
+         idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
       }
 
       elevator.updateFramesRecursively();

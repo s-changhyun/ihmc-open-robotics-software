@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -17,13 +17,13 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -59,7 +59,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    private static final boolean RESET_FUNCTIONS_ON_JOINT_CHANGE = false;
 
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
-   private final SDFFullHumanoidRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
+   private final FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    private final ArrayList<ValkyrieSliderBoardJointHolder> jointHolders = new ArrayList<>();
 
@@ -128,7 +128,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       ArrayList<String> jointNames = new ArrayList<>();
       for (String jointName : torqueControlledJoints)
       {
-         OneDoFJoint joint = sdfFullRobotModel.getOneDoFJointByName(jointName);
+         OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
          EffortJointHandle handle = createEffortJointHandle(jointName);
          jointHolders.add(new EffortJointHolder(this, joint, handle, registry, dt));
          jointNames.add(joint.getName());
@@ -136,7 +136,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
       for (String jointName : positionControlledJoints)
       {
-         OneDoFJoint joint = sdfFullRobotModel.getOneDoFJointByName(jointName);
+         OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
          PositionJointHandle handle = createPositionJointHandle(jointName);
          jointHolders.add(new PositionJointHolder(this, joint, handle, registry, dt));
          jointNames.add(joint.getName());
@@ -203,7 +203,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       loadStandPrepSetPoints();
       selectedJoint.notifyVariableChangedListeners();
       
-      yoVariableServer.setMainRegistry(registry, sdfFullRobotModel, null);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel, null);
       yoVariableServer.start();
    }
 

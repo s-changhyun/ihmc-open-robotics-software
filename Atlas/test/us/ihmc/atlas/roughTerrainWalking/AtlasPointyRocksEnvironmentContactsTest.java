@@ -1,14 +1,18 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.HumanoidPointyRocksEnvironmentContactsTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.roughTerrainWalking.HumanoidPointyRocksEnvironmentContactsTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW})
 public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocksEnvironmentContactsTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
@@ -28,7 +32,23 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    protected DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints)
    {
-      robotModel.addMoreFootContactPointsSimOnly(16, 8, createOnlyEdgePoints);
+      robotModel.addMoreFootContactPointsSimOnly(xContactPoints, yContactPoints, createOnlyEdgePoints);
       return robotModel;
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 137.5, categoriesOverride = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
+   @Test(timeout = 690000)
+   public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkingOnLinesInEnvironment();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 69.7, categoriesOverride = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
+   @Test(timeout = 350000)
+   public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkingOnPointInEnvironment();
    }
 }

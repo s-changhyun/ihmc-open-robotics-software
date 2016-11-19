@@ -8,16 +8,20 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class VisualizerUtils
 {
+   private static final boolean TRACK_YAW = false;
+   
    public static SimulationOverheadPlotter createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... yoGraphicsListRegistries)
    {
       return createOverheadPlotter(scs, showOverheadView, null, yoGraphicsListRegistries);
@@ -52,27 +56,32 @@ public class VisualizerUtils
             continue;
 
          yoGraphicsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
-         ArrayList<ArtifactList> buffer = new ArrayList<>();
-         yoGraphicsListRegistry.getRegisteredArtifactLists(buffer);
-
-         if (variableNameToTrack != null && !variableNameToTrack.isEmpty())
+      }
+      
+      if (variableNameToTrack != null && !variableNameToTrack.isEmpty())
+      {
+         YoVariable<?> trackingVariable;
+         if ((trackingVariable = scs.getVariable(variableNameToTrack + "X")) != null && trackingVariable instanceof DoubleYoVariable)
          {
-            for (ArtifactList artifactList : buffer)
+            plotter.setXVariableToTrack((DoubleYoVariable) trackingVariable);
+         }
+         if ((trackingVariable = scs.getVariable(variableNameToTrack + "Y")) != null && trackingVariable instanceof DoubleYoVariable)
+         {
+            plotter.setYVariableToTrack((DoubleYoVariable) trackingVariable);
+         }
+         if (TRACK_YAW)
+         {
+            if ((trackingVariable = scs.getVariable(variableNameToTrack + "Yaw")) != null && trackingVariable instanceof DoubleYoVariable)
             {
-               for (Artifact artifact : artifactList.getArtifacts())
-               {
-                  if (artifact.getID() == variableNameToTrack)
-                  {
-                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
-                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
-                  }
-               }
+               plotter.setYawVariableToTrack((DoubleYoVariable) trackingVariable);
             }
          }
       }
 
       if (showOverheadView)
+      {
          scs.getStandardSimulationGUI().selectPanel(plotterName);
+      }
 
       return plotter;
    }

@@ -1,8 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -17,23 +15,19 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
-import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SimpleSO3TrajectoryPointTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
@@ -51,7 +45,7 @@ public class SimpleSO3TrajectoryPointTest
 
       double time = 3.4;
       TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
-      orientation.normalizeAndLimitToPiMinusPi();
+      orientation.normalize();
       Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
 
       simpleTrajectoryPoint.set(time, orientation, angularVelocity);
@@ -74,7 +68,7 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(expectedSimpleSO3TrajectoryPoint.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -136,7 +130,7 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -218,7 +212,7 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -246,7 +240,7 @@ public class SimpleSO3TrajectoryPointTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
@@ -280,7 +274,7 @@ public class SimpleSO3TrajectoryPointTest
             expectedAngularVelocity, testedSimpleSO3TrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
@@ -343,7 +337,7 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
@@ -434,7 +428,7 @@ public class SimpleSO3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {

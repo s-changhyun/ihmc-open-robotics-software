@@ -13,13 +13,14 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlRandomWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -32,7 +33,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       try
       {
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -56,12 +57,12 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
    
    private double randomValidVelocity(Random random)
    {
-      return (2.0 * 0.25 * (random.nextDouble() - 0.5));
+      return (2.0 * (random.nextDouble() - 0.5) * 0.15);
    }
    
    private double randomValidYawRate(Random random)
    {
-      return (2.0 * 0.2 * (random.nextDouble() - 0.5));
+      return (2.0 * (random.nextDouble() - 0.5) * 0.1);
    }
    
    private double randomSimulationDuration(Random random)
@@ -69,7 +70,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       return random.nextDouble() * 10.0 + 5.0;
    }
    
-   @DeployableTestMethod(estimatedDuration = 300.0)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0)
    @Test(timeout = 1000000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -98,7 +99,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 200.0)
+   @ContinuousIntegrationTest(estimatedDuration = 200.0)
    @Test(timeout = 1000000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -128,7 +129,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 300.0)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0)
    @Test(timeout = 1000000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

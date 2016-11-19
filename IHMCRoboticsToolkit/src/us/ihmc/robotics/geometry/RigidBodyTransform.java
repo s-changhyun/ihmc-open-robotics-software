@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.Serializable;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;
@@ -14,31 +15,34 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.Serializable;
-import java.util.Random;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
 
 /**
- * 
+ *
  * This class creates a 4x4 affine, rigid body transformation matrix. The top
  * left 3x3 is an orthogonal rotation matrix, while the top right 3x1 is a vector
- * describing a translation. 
- * 
- * T = | xx yx zx px | 
- *     | xy yy zy py |  
- *     | xz yz zz pz |  
+ * describing a translation.
+ *
+ * T = | xx yx zx px |
+ *     | xy yy zy py |
+ *     | xz yz zz pz |
  *     | 0 0 0 1 |
  */
 
 public class RigidBodyTransform implements Serializable
 {
    private static final long serialVersionUID = 1915106568805908193L;
-   
+
    public double mat00 = 1.0;
    public double mat01 = 0.0;
    public double mat02 = 0.0;
@@ -71,7 +75,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transformation matrix from Matrix4d
-    * 
+    *
     * @param mat4d
     */
    public RigidBodyTransform(Matrix4d matrix)
@@ -81,7 +85,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transformation matrix from Matrix4f
-    * 
+    *
     * @param mat4d
     */
    public RigidBodyTransform(Matrix4f matrix)
@@ -91,7 +95,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transform from 1D array of doubles.
-    * 
+    *
     * @param doubleArray
     */
    public RigidBodyTransform(double[] doubleArray)
@@ -101,7 +105,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transform from 1D array of floats.
-    * 
+    *
     * @param floatArray
     */
    public RigidBodyTransform(float[] floatArray)
@@ -111,7 +115,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transform from 4x4 DenseMatrix64F
-    * 
+    *
     * @param matrix
     */
    public RigidBodyTransform(DenseMatrix64F matrix)
@@ -121,86 +125,84 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create 4x4 RigidBodyTransform from rotation matrix of type DenseMatrix64F and
-    * translational vector of type Vector3d
-    * 
+    * translation of type Tuple3d
+    *
     * @param matrix
-    * @param vector
+    * @param translation
     */
-   public RigidBodyTransform(DenseMatrix64F matrix, Vector3d vector)
+   public RigidBodyTransform(DenseMatrix64F matrix, Tuple3d translation)
    {
       if (matrix.numRows != 3 && matrix.numCols != 3)
       {
          throw new RuntimeException("Incorrectly sized matrix. Must be 3x3");
       }
-      set(matrix, vector);
+      set(matrix, translation);
    }
 
    /**
-    * Create transformation matrix from rotation matrix and vector translation
-    * 
+    * Create transformation matrix from rotation matrix and translation
+    *
     * @param matrix
-    * @param vector
+    * @param translation
     */
-   public RigidBodyTransform(Matrix3d matrix, Vector3d vector)
+   public RigidBodyTransform(Matrix3d matrix, Tuple3d translation)
    {
-      set(matrix, vector);
+      set(matrix, translation);
    }
 
    /**
-    * Create transformation matrix from rotation matrix and vector translation
-    * 
+    * Create transformation matrix from rotation matrix and translation
+    *
     * @param matrix
-    * @param vector
+    * @param translation
     */
-   public RigidBodyTransform(Matrix3f matrix, Vector3f vector)
+   public RigidBodyTransform(Matrix3f matrix, Tuple3f translation)
    {
-      set(matrix, vector);
+      set(matrix, translation);
    }
 
    /**
-    * Create RigidBodyTransform from quaternion describing a rotation and vector
-    * describing a translation.
-    * 
-    * @param quat
-    * @param vector
+    * Create RigidBodyTransform from quaternion describing a rotation and a translation.
+    *
+    * @param quaternion
+    * @param translation
     */
-   public RigidBodyTransform(Quat4d quat, Vector3d vector)
+   public RigidBodyTransform(Quat4d quaternion, Tuple3d translation)
    {
-      set(quat, vector);
+      set(quaternion, translation);
    }
 
    /**
-    * Create RigidBodyTransform from quaternion describing a rotation and vector
-    * describing a translation.
-    * 
-    * @param quat
-    * @param vector
+    * Create RigidBodyTransform from quaternion describing a rotation and a translation.
+    *
+    * @param quaternion
+    * @param translation
     */
-   public RigidBodyTransform(Quat4f quat, Vector3f vector)
+   public RigidBodyTransform(Quat4f quaternion, Tuple3f translation)
    {
-      set(quat, vector);
+      set(quaternion, translation);
    }
 
    /**
-    * Create RigidBodyTransform from AxisAngle4d and Vector3d
-    * 
+    * Create RigidBodyTransform from AxisAngle4d and Tuple3d
+    *
     * @param axisAngle
-    * @param vector
+    * @param translation
     */
-   public RigidBodyTransform(AxisAngle4d axisAngle, Vector3d vector)
+   public RigidBodyTransform(AxisAngle4d axisAngle, Tuple3d translation)
    {
-      set(axisAngle, vector);
+      set(axisAngle, translation);
    }
 
    /**
-    * Create RigidBodyTransform from AxisAngle4d and Vector3d
-    * 
+    * Create RigidBodyTransform from AxisAngle4f and Tuple3f
+    *
     * @param axisAngle
-    * @param vector
+    * @param translation
     */
-   public RigidBodyTransform(AxisAngle4f axisAngle, Vector3f vector)
+   public RigidBodyTransform(AxisAngle4f axisAngle, Vector3f translation)
    {
-      set(axisAngle, vector);
+      set(axisAngle, translation);
    }
 
    public static RigidBodyTransform generateRandomTransform(Random random)
@@ -213,9 +215,9 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert AxisAngle representation to rotation matrix and store as 
+    * Convert AxisAngle representation to rotation matrix and store as
     * rotational component of this transform.
-    * 
+    *
     * @param axisAngle
     */
    public void setRotation(AxisAngle4d axisAngle)
@@ -224,9 +226,9 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert AxisAngle representation to rotation matrix and store as 
+    * Convert AxisAngle representation to rotation matrix and store as
     * rotational component of this transform.
-    * 
+    *
     * @param axisAngle
     */
    public void setRotation(AxisAngle4f axisAngle)
@@ -272,9 +274,9 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert quaternion to rotation matrix and store as rotational 
+    * Convert quaternion to rotation matrix and store as rotational
     * component of this transform.
-    * 
+    *
     * @param quat
     */
    public void setRotation(Quat4d quat)
@@ -283,16 +285,16 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert quaternion to rotation matrix and store as rotational 
+    * Convert quaternion to rotation matrix and store as rotational
     * component of this transform.
-    * 
+    *
     * @param quat
     */
    public void setRotation(Quat4f quat)
    {
       setRotationWithQuaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
    }
-   
+
    public void setRotationWithQuaternion(double qx, double qy, double qz, double qw)
    {
       double yy2 = 2.0 * qy * qy;
@@ -318,7 +320,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set the 3x3 rotation matrix equal to mat3d.
-    * 
+    *
     * @param matrix
     */
    public void setRotation(Matrix3d matrix)
@@ -336,7 +338,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set the 3x3 rotation matrix equal to mat3f.
-    * 
+    *
     * @param mat3d
     */
    public void setRotation(Matrix3f matrix)
@@ -355,7 +357,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Sets rotation portion equal to the rotation matrix described in the
     * parameter matrix.
-    * 
+    *
     * @param matrix
     */
    public void setRotation(DenseMatrix64F matrix)
@@ -377,12 +379,12 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set translational portion of the transformation matrix
-    * 
-    * @param vector
+    *
+    * @param translation
     */
-   public final void setTranslation(Vector3d vector)
+   public final void setTranslation(Tuple3d translation)
    {
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
    }
 
    public void setTranslation(double x, double y, double z)
@@ -391,10 +393,10 @@ public class RigidBodyTransform implements Serializable
       mat13 = y;
       mat23 = z;
    }
-   
+
    /**
    *  Add a translation to the current transform. It is equivalent to:
-   *  
+   *
    *      transform.setTranslationAndIdentityRotation(translation);
    *      this = this*transform
    */
@@ -406,50 +408,50 @@ public class RigidBodyTransform implements Serializable
       mat13 = temp.getY();
       mat23 = temp.getZ();
    }
-   
+
    /**
-   *  Add a rotation to the current transform. 
+   *  Add a rotation to the current transform.
    */
    public final void applyRotationX(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.setRotationRollAndZeroTranslation(angle);    
+      temp.setRotationRollAndZeroTranslation(angle);
       multiply(temp);
    }
-   
+
    /**
-   *  Add a rotation to the current transform. 
+   *  Add a rotation to the current transform.
    */
    public final void applyRotationY(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.setRotationPitchAndZeroTranslation(angle);   
+      temp.setRotationPitchAndZeroTranslation(angle);
       multiply(temp);
    }
-   
+
    /**
-   *  Add a rotation to the current transform. 
+   *  Add a rotation to the current transform.
    */
    public final void applyRotationZ(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.setRotationYawAndZeroTranslation(angle);    
+      temp.setRotationYawAndZeroTranslation(angle);
       multiply(temp);
    }
-   
+
    /**
     * Set translational portion of the transformation matrix
-    * 
+    *
     * @param vec3d
     */
-   public final void setTranslation(Vector3f vector)
+   public final void setTranslation(Tuple3f translation)
    {
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
    }
 
    /**
     * Set elements of this transform equal to the elements of transform.
-    * 
+    *
     * @param transform
     */
    public final void set(RigidBodyTransform transform)
@@ -471,7 +473,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Matrix3d matrix.
-    * 
+    *
     * @param matrix
     */
    public final void setRotationAndZeroTranslation(Matrix3d matrix)
@@ -481,21 +483,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Set this transform to have translation described in vector 
+    * Set this transform to have translation described in vector
     * and a rotation equal to the Matrix3d matrix.
-    * 
+    *
     * @param matrix
     */
-   public final void set(Matrix3d matrix, Vector3d vector)
+   public final void set(Matrix3d matrix, Tuple3d translation)
    {
       setRotation(matrix);
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
    }
 
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Quat4d quat.
-    * 
+    *
     * @param quat
     */
    public final void setRotationAndZeroTranslation(Quat4d quat)
@@ -507,19 +509,19 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have translation described in vector and a rotation
     * equal to the Quat4d quat.
-    * 
+    *
     * @param quat
     */
-   public final void set(Quat4d quat, Vector3d vector)
+   public final void set(Quat4d quat, Tuple3d translation)
    {
       setRotation(quat);
-      setTranslation(vector);
+      setTranslation(translation);
    }
 
    /**
     * Sets this transform to have rotation described by axisAngle and zero
     * translation.
-    * 
+    *
     * @param axisAngle
     */
    public final void setRotationAndZeroTranslation(AxisAngle4d axisAngle)
@@ -529,21 +531,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Sets this transform to have rotation described by axisAngle and 
+    * Sets this transform to have rotation described by axisAngle and
     * translation described in the Vector3d argument vector.
-    * 
+    *
     * @param axisAngle
     */
-   public final void set(AxisAngle4d axisAngle, Vector3d vector)
+   public final void set(AxisAngle4d axisAngle, Tuple3d translation)
    {
       setRotation(axisAngle);
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
    }
 
    /**
     * Sets this transform to have rotation described by axisAngle and zero
     * translation.
-    * 
+    *
     * @param axisAngle
     */
    public final void setRotationAndZeroTranslation(AxisAngle4f axisAngle)
@@ -553,9 +555,9 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Sets this transform to have rotation described by axisAngle and 
+    * Sets this transform to have rotation described by axisAngle and
     * translation described by the Vector3f vector.
-    * 
+    *
     * @param axisAngle
     */
    public final void set(AxisAngle4f axisAngle, Vector3f vector)
@@ -567,7 +569,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Quat4f quat.
-    * 
+    *
     * @param quat
     */
    public final void setRotationAndZeroTranslation(Quat4f quat)
@@ -585,21 +587,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Set this transform to have translation described in vector and a rotation
+    * Set this transform to have translation described in translation and a rotation
     * equal to the Quat4f quat.
-    * 
+    *
     * @param quat
     */
-   public final void set(Quat4f quat, Vector3f vector)
+   public final void set(Quat4f quat, Tuple3f translation)
    {
       setRotation(quat);
-      setTranslation(vector);
+      setTranslation(translation);
    }
 
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Matrix3f matrix.
-    * 
+    *
     * @param matrix
     */
    public final void setRotationAndZeroTranslation(Matrix3f matrix)
@@ -609,26 +611,46 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Set this transform to have zero translation and a rotation equal to the
+    * Set this transform to have translation described in translation and a rotation equal to the
     * Matrix3f matrix.
-    * 
+    *
     * @param matrix
     */
-   public final void set(Matrix3f matrix, Vector3f vector)
+   public final void set(Matrix3f matrix, Tuple3f translation)
    {
       setRotation(matrix);
-      setTranslation(vector);
+      setTranslation(translation);
    }
 
    /**
     * Set this transform to have an identity rotation and a translation given
     * by the Vector3d vector.
-    * 
+    *
+    * @param translation
+    */
+   public final void setTranslationAndIdentityRotation(Tuple3d translation)
+   {
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
+      mat00 = 1.0;
+      mat01 = 0.0;
+      mat02 = 0.0;
+      mat10 = 0.0;
+      mat11 = 1.0;
+      mat12 = 0.0;
+      mat20 = 0.0;
+      mat21 = 0.0;
+      mat22 = 1.0;
+   }
+
+   /**
+    * Set this transform to have an identity rotation and a translation given
+    * by the x, y, z elements.
+    *
     * @param vector
     */
-   public final void setTranslationAndIdentityRotation(Vector3d vector)
+   public final void setTranslationAndIdentityRotation(double x, double y, double z)
    {
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(x, y, z);
       mat00 = 1.0;
       mat01 = 0.0;
       mat02 = 0.0;
@@ -642,7 +664,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Sets rotation to the identity, does not effect the translational component of the Transform
-    * 
+    *
     * @param vector
     */
    public final void setRotationToIdentity()
@@ -660,13 +682,13 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set this transform to have an identity rotation and a translation given
-    * by the Vector3d vector.
-    * 
-    * @param vector
+    * by the Tuple3f vector.
+    *
+    * @param translation
     */
-   public final void setTranslationAndIdentityRotation(Vector3f vector)
+   public final void setTranslationAndIdentityRotation(Tuple3f translation)
    {
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
       mat00 = 1.0;
       mat01 = 0.0;
       mat02 = 0.0;
@@ -680,7 +702,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of this transform equal to the elements of matrix.
-    * 
+    *
     * @param matrix
     */
    public final void set(DenseMatrix64F matrix)
@@ -706,10 +728,10 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of this transform equal to the elements of matrix.
-    * 
+    *
     * @param matrix
     */
-   public final void set(DenseMatrix64F matrix, Vector3d vector)
+   public final void set(DenseMatrix64F matrix, Tuple3d translation)
    {
       if (matrix.numCols != 3 && matrix.numRows != 3)
       {
@@ -717,13 +739,13 @@ public class RigidBodyTransform implements Serializable
       }
 
       setRotation(matrix);
-      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      setTranslation(translation.getX(), translation.getY(), translation.getZ());
    }
 
    /**
     * Sets the elements of this transform to the elements of the transform in
     * doubleArray.
-    * 
+    *
     * @param doubleArray
     */
    public final void set(double[] doubleArray)
@@ -745,7 +767,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Sets the elements of this transform to the elements of the transform in
     * floatArray.
-    * 
+    *
     * @param floatArray
     */
    public final void set(float[] floatArray)
@@ -765,11 +787,11 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Sets the elements of this tranform equal to that of the 
-    * transpose of floatArray. This is useful for setting a 
-    * transform from a column-major floatArray describing a 
+    * Sets the elements of this tranform equal to that of the
+    * transpose of floatArray. This is useful for setting a
+    * transform from a column-major floatArray describing a
     * transform.
-    * 
+    *
     * @param floatArray
     */
    public final void setAsTranspose(float[] floatArray)
@@ -798,7 +820,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of transform equal to elements of the Matrix4d.
-    * 
+    *
     * @param matrix
     */
    public final void set(Matrix4d matrix)
@@ -820,7 +842,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * This method is for when the Matrix4d matrix is column major and needs to
     * be transposed.
-    * 
+    *
     * @param matrix
     */
    public void setAsTranspose(Matrix4d matrix)
@@ -849,7 +871,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * This method is for when the Matrix4d matrix is column major and needs to
     * be transposed.
-    * 
+    *
     * @param matrix
     */
    public void setAsTranspose(Matrix4f matrix)
@@ -877,7 +899,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of transform equal to elements of the Matrix4d matrix.
-    * 
+    *
     * @param mat4d
     */
    public final void set(Matrix4f matrix)
@@ -931,7 +953,7 @@ public class RigidBodyTransform implements Serializable
     * orientation of each rotation is not effected by any of the other
     * rotations. This method sets the translational component of this
     * transform3d to zeros.
-    * 
+    *
     * @param vector
     */
    public final void setRotationEulerAndZeroTranslation(Vector3d vector)
@@ -954,7 +976,7 @@ public class RigidBodyTransform implements Serializable
     * orientation of each rotation is not effected by any of the other
     * rotations. This method sets the translational component of this
     * transform3d to zeros.
-    * 
+    *
     * @param rotX
     * @param rotY
     * @param rotZ
@@ -995,7 +1017,7 @@ public class RigidBodyTransform implements Serializable
     * X, Y, and Z axes respectively. Note that this method is here for the
     * purpose of unit testing the method setEuler. This particular solution is
     * only valid for -pi/2 < vector.y < pi/2 and for vector.y != 0.
-    * 
+    *
     * @param vector
     */
    public void getRotationEuler(Vector3d vector)
@@ -1007,7 +1029,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation matrix of type Matrix3d
-    * 
+    *
     * @param matrix
     */
    public void getRotation(Matrix3d matrix)
@@ -1025,7 +1047,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation matrix of type Matrix3f
-    * 
+    *
     * @param matrix
     */
    public void getRotation(Matrix3f matrix)
@@ -1043,7 +1065,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation matrix of type DenseMatrix64F
-    * 
+    *
     * @param matrix
     */
    public void getRotation(DenseMatrix64F matrix)
@@ -1061,7 +1083,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation in quaternion form.
-    * 
+    *
     * @param quat
     */
    public void getRotation(Quat4d quat)
@@ -1103,13 +1125,13 @@ public class RigidBodyTransform implements Serializable
          quat.setW((mat10 - mat01) / val);
       }
       /* Other implementation. Already tested.
-       * 
+       *
       double q0,q1,q2,q3;
       q0 = ( mat00 + mat11 + mat22 + 1.0) / 4.0;
       q1 = ( mat00 - mat11 - mat22 + 1.0) / 4.0;
       q2 = (-mat00 + mat11 - mat22 + 1.0) / 4.0;
       q3 = (-mat00 - mat11 + mat22 + 1.0) / 4.0;
-      
+
       if(q0 < 0.0) q0 = 0.0;
       if(q1 < 0.0) q1 = 0.0;
       if(q2 < 0.0) q2 = 0.0;
@@ -1145,13 +1167,13 @@ public class RigidBodyTransform implements Serializable
       quat.x = q1;
       quat.y = q2;
       quat.z = q3;
-      
+
       quat.normalize();*/
    }
 
    /**
     * Return rotation in quaternion form.
-    * 
+    *
     * @param quat
     */
    public void getRotation(Quat4f quat)
@@ -1194,7 +1216,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation in AxisAngle form.
-    * 
+    *
     * @param axisAngle
     */
    public void getRotation(AxisAngle4d axisAngle)
@@ -1289,21 +1311,21 @@ public class RigidBodyTransform implements Serializable
          }
       }
    }
-   
+
    public boolean isRotationMatrixSingular(double epsilon)
    {
       return (Math.abs(mat01 - mat10) < epsilon) && (Math.abs(mat02 - mat20) < epsilon) && (Math.abs(mat12 - mat21) < epsilon);
    }
-   
+
    public boolean isRotationMatrixEpsilonIdentity(double epsilon)
-   {     
+   {
       return (Math.abs(mat01 + mat10) < epsilon) && (Math.abs(mat02 + mat20) < epsilon) && (Math.abs(mat12 + mat21) < epsilon)
             && (Math.abs(mat00 + mat11 + mat22 - 3) < epsilon);
    }
 
    /**
     * Return rotation in AxisAngle form.
-    * 
+    *
     * @param axisAngle
     */
    public void getRotation(AxisAngle4f axisAngle)
@@ -1336,44 +1358,32 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Return translational part as Vector3d
-    * 
-    * @param vector
+    * Return translational part as Tuple3d
+    *
+    * @param translationToPack
     */
-   public final void getTranslation(Vector3d vector)
+   public final void getTranslation(Tuple3d translationToPack)
    {
-      vector.setX(mat03);
-      vector.setY(mat13);
-      vector.setZ(mat23);
+      translationToPack.setX(mat03);
+      translationToPack.setY(mat13);
+      translationToPack.setZ(mat23);
    }
 
    /**
-    * Return translational part as Vector3f
-    * 
-    * @param vector
+    * Return translational part as Tuple3f
+    *
+    * @param translationToPack
     */
-   public final void getTranslation(Vector3f vector)
+   public final void getTranslation(Tuple3f translationToPack)
    {
-      vector.setX((float) mat03);
-      vector.setY((float) mat13);
-      vector.setZ((float) mat23);
-   }
-   
-   /**
-    * Return translational part as Point3d
-    * 
-    * @param point
-    */
-   public final void getTranslation(Point3d point)
-   {
-      point.setX(mat03);
-      point.setY(mat13);
-      point.setZ(mat23);
+      translationToPack.setX((float) mat03);
+      translationToPack.setY((float) mat13);
+      translationToPack.setZ((float) mat23);
    }
 
    /**
     * Return RigidBodyTransform as array of doubles
-    * 
+    *
     * @param ret
     */
    public final void get(double[] ret)
@@ -1398,7 +1408,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return RigidBodyTransform as array of floats
-    * 
+    *
     * @param ret
     */
    public final void get(float[] ret)
@@ -1423,7 +1433,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return Transform as Matrix4d type.
-    * 
+    *
     * @param ret
     */
    public final void get(Matrix4d ret)
@@ -1448,7 +1458,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Pack transform into Matrix4f
-    * 
+    *
     * @param ret
     */
    public final void get(Matrix4f ret)
@@ -1473,7 +1483,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Pack transform into DenseMatrix64F
-    * 
+    *
     * @param ret
     */
    public final void get(DenseMatrix64F ret)
@@ -1502,72 +1512,59 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Pack rotation part into Matrix3d and translation part into Vector3d
-    * 
-    * @param matrix
-    * @param vector
+    * Pack rotation part into Matrix3d and translation part into Tuple3d
+    *
+    * @param matrixToPack
+    * @param translationPack
     */
-   public void get(Matrix3d matrix, Vector3d vector)
+   public void get(Matrix3d matrixToPack, Tuple3d translationPack)
    {
-      getRotation(matrix);
-      getTranslation(vector);
+      getRotation(matrixToPack);
+      getTranslation(translationPack);
    }
 
    /**
-    * Pack rotation part into Matrix3f and translation part into Vector3f
-    * 
-    * @param matrix
-    * @param vector
+    * Pack rotation part into Matrix3f and translation part into Tuple3f
+    *
+    * @param matrixToPack
+    * @param translationToPack
     */
-   public void get(Matrix3f matrix, Vector3f vector)
+   public void get(Matrix3f matrixToPack, Tuple3f translationToPack)
    {
-      getRotation(matrix);
-      getTranslation(vector);
+      getRotation(matrixToPack);
+      getTranslation(translationToPack);
    }
 
    /**
     * Convert and pack rotation part of transform into Quat4d and pack
-    * translation into Vector3d.
-    * 
-    * @param quat
-    * @param vector
+    * translation into Tuple3d.
+    *
+    * @param quaternionToPack
+    * @param translationToPack
     */
-   public void get(Quat4d quat, Vector3d vector)
+   public void get(Quat4d quaternionToPack, Tuple3d translationToPack)
    {
-      getRotation(quat);
-      getTranslation(vector);
-   }
-   
-   /**
-    * Convert and pack rotation part of transform into Quat4d and pack
-    * translation into Point3d.
-    * 
-    * @param quat
-    * @param point
-    */
-   public void get(Quat4d quat, Point3d point)
-   {
-      getRotation(quat);
-      getTranslation(point);
+      getRotation(quaternionToPack);
+      getTranslation(translationToPack);
    }
 
    /**
     * Convert and pack rotation part of transform into Quat4f and pack
     * translation into Vector3f.
-    * 
-    * @param quat
-    * @param vector
+    *
+    * @param quaternionToPack
+    * @param translationToPack
     */
-   public void get(Quat4f quat, Vector3f vector)
+   public void get(Quat4f quaternionToPack, Tuple3f translationToPack)
    {
-      getRotation(quat);
-      getTranslation(vector);
+      getRotation(quaternionToPack);
+      getTranslation(translationToPack);
    }
 
    /**
     * Multiplies this RigidBodyTransform by transform and stores the result in this,
     * i.e. this = this*transform
-    * 
+    *
     * @param transform
     */
    public final void multiply(RigidBodyTransform transform)
@@ -1578,7 +1575,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Multiplies transform1 and transform2 and puts result into this. this =
     * transform1*transform2
-    * 
+    *
     * @param transform1
     * @param transform2
     */
@@ -1614,8 +1611,8 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Compute the inverse of the RigidBodyTransform passed in as an 
-    * argument exploiting the orthogonality of the rotation matrix 
+    * Compute the inverse of the RigidBodyTransform passed in as an
+    * argument exploiting the orthogonality of the rotation matrix
     * and store the result in this.
     * @param transform
     */
@@ -1657,7 +1654,7 @@ public class RigidBodyTransform implements Serializable
       mat03 = newTransX;
       mat13 = newTransY;
    }
-   
+
    public final void invertRotationButKeepTranslation()
    {
       double tmp01 = mat01;
@@ -1685,7 +1682,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Create RigidBodyTransform with zero translation and the rotation matrix being a
     * rotation about the x-axis by angle.
-    * 
+    *
     * @param angle
     */
    public void setRotationRollAndZeroTranslation(double angle)
@@ -1719,7 +1716,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Create RigidBodyTransform with zero translation and the rotation matrix being a
     * rotation about the y-axis by angle.
-    * 
+    *
     * @param angle
     */
    public void setRotationPitchAndZeroTranslation(double angle)
@@ -1753,7 +1750,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Create RigidBodyTransform with zero translation and the rotation matrix being a
     * rotation about the z-axis by angle.
-    * 
+    *
     * @param angle
     */
    public void setRotationYawAndZeroTranslation(double angle)
@@ -1778,7 +1775,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Check if the elements of this are within epsilon of the elements of
     * transform.
-    * 
+    *
     * @param transform
     * @param epsilon
     * @return
@@ -1803,7 +1800,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Returns true if each element of this is equal to each element of
     * transform within a default tolerance of 1e-10.
-    * 
+    *
     * @param transform
     * @return
     */
@@ -1816,9 +1813,9 @@ public class RigidBodyTransform implements Serializable
     * Returns true if the Object o1 is of type Transform3D and all of the data
     * members of o1 are equal to the corresponding data members in this
     * Transform3D.
-    * 
+    *
     * @param o1 the object with which the comparison is made.
-    *            
+    *
     * @return true or false
     */
    @Override
@@ -1830,7 +1827,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector4d vector)
@@ -1850,7 +1847,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3d vector)
@@ -1866,7 +1863,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3d vectorIn, Vector3d vectorOut)
@@ -1886,7 +1883,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector4f vector)
@@ -1909,7 +1906,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3f vector)
@@ -1925,7 +1922,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3f vectorIn, Vector3f vectorOut)
@@ -1944,7 +1941,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Transform vectorIn using this transform and store result in vectorOut.
-    * 
+    *
     * @param vectorIn
     * @param vectorOut
     */
@@ -1965,7 +1962,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Transform vectorIn using this transform and store result in vectorOut.
-    * 
+    *
     * @param vectorIn
     * @param vectorOut
     */
@@ -1987,7 +1984,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform the Point3d point by this transform and place result back in
     * point.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3d point)
@@ -2003,7 +2000,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform the Point3d pointIn by this transform and place result in
     * pointOut.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3d pointIn, Point3d pointOut)
@@ -2023,7 +2020,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform the Point3f point by this transform and place result back in
     * point.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3f point)
@@ -2039,7 +2036,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform the Point3f pointIn by this transform and place result in
     * pointOut.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3f pointIn, Point3f pointOut)
@@ -2067,7 +2064,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return the determinant of this transform.
-    * 
+    *
     * @return
     */
    public final double determinantRotationPart()
@@ -2130,28 +2127,28 @@ public class RigidBodyTransform implements Serializable
 
    static final ByteArrayOutputStream stream = new ByteArrayOutputStream();
    static final PrintStream out = new PrintStream(stream);
-   
+
    /**
     * Returns the matrix elements of this transform as a string.
-    * 
+    *
     * @return the matrix elements of this transform
-    */  
+    */
    @Override
    synchronized public String toString()
-   {     
+   {
       return toString(8);
    }
-   
+
    synchronized public String toString(int decimals)
-   {     
+   {
       stream.reset();
       String F =" %" + (3+decimals) + "." + decimals + "f ";
       out.format( F + F + F + "|" + F + "\n", mat00, mat01, mat02, mat03);
       out.format( F + F + F + "|" + F + "\n", mat10, mat11, mat12, mat13);
       out.format( F + F + F + "|" + F + "\n", mat20, mat21, mat22, mat23);
-      
+
       F =" %" + (3+decimals) + "." + 0 + "f ";
-      out.format( F + F + F + "|" + F + "\n", 0f,0f,0f,1f );      
+      out.format( F + F + F + "|" + F + "\n", 0f,0f,0f,1f );
       return stream.toString();
    }
 
@@ -2273,5 +2270,22 @@ public class RigidBodyTransform implements Serializable
    public double getM23()
    {
       return mat23;
+   }
+
+   public boolean containsNaN()
+   {
+      if (Double.isNaN(mat00)) return true;
+      if (Double.isNaN(mat01)) return true;
+      if (Double.isNaN(mat02)) return true;
+      if (Double.isNaN(mat03)) return true;
+      if (Double.isNaN(mat10)) return true;
+      if (Double.isNaN(mat11)) return true;
+      if (Double.isNaN(mat12)) return true;
+      if (Double.isNaN(mat13)) return true;
+      if (Double.isNaN(mat20)) return true;
+      if (Double.isNaN(mat21)) return true;
+      if (Double.isNaN(mat22)) return true;
+      if (Double.isNaN(mat23)) return true;
+      return false;
    }
 }

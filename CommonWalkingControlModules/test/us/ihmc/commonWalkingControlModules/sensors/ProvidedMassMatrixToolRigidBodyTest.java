@@ -6,14 +6,14 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class ProvidedMassMatrixToolRigidBodyTest
 {
@@ -22,7 +22,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    private final double gravity = 9.81;
    private final double mass = 2.0;
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testprovidedMassMatrixToolRigidBody()
    {

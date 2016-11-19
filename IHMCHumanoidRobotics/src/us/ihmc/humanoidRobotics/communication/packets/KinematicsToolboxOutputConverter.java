@@ -5,10 +5,10 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
-import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -26,18 +26,18 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class KinematicsToolboxOutputConverter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FullHumanoidRobotModel fullRobotModelToUseForConversion;
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] oneDoFJoints;
    private final int jointsHashCode;
 
-   public KinematicsToolboxOutputConverter(SDFFullHumanoidRobotModelFactory fullRobotModelFactory)
+   public KinematicsToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       this.fullRobotModelToUseForConversion = fullRobotModelFactory.createFullRobotModel();
       rootJoint = fullRobotModelToUseForConversion.getRootJoint();

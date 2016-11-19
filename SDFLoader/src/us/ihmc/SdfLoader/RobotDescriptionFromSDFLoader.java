@@ -26,12 +26,17 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.VerticalScan;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.SimulatedLIDARSensorLimitationParameters;
+import us.ihmc.robotics.lidar.SimulatedLIDARSensorNoiseParameters;
+import us.ihmc.robotics.lidar.SimulatedLIDARSensorUpdateParameters;
+import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.ForceSensorDescription;
@@ -44,9 +49,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RobotDescriptionFromSDFLoader
 {
@@ -73,13 +76,14 @@ public class RobotDescriptionFromSDFLoader
       return robotDescription;
    }
 
-   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, JointNameMap jointNameMap, boolean useCollisionMeshes,
+         boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
-      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
    }
 
-   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
@@ -108,9 +112,9 @@ public class RobotDescriptionFromSDFLoader
       robotDescription.addRootJoint(rootJointDescription);
       jointDescriptions.put(rootJointDescription.getName(), rootJointDescription);
 
-      if (sdfJointNameMap != null)
+      if (jointNameMap != null)
       {
-         enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.isTorqueVelocityLimitsEnabled();
+         enableTorqueVelocityLimits = enableTorqueVelocityLimits && jointNameMap.isTorqueVelocityLimitsEnabled();
       }
 
       for (SDFJointHolder child : rootLink.getChildren())
@@ -119,9 +123,9 @@ public class RobotDescriptionFromSDFLoader
 
          Set<String> lastSimulatedJoints;
 
-         if (sdfJointNameMap != null)
+         if (jointNameMap != null)
          {
-            lastSimulatedJoints = sdfJointNameMap.getLastSimulatedJoints();
+            lastSimulatedJoints = jointNameMap.getLastSimulatedJoints();
          }
          else
          {
@@ -133,9 +137,9 @@ public class RobotDescriptionFromSDFLoader
       // Ground Contact Points:
 
       LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
-      if (sdfJointNameMap != null)
+      if (jointNameMap != null)
       {
-         for (ImmutablePair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
+         for (ImmutablePair<String, Vector3d> jointContactPoint : jointNameMap.getJointNameGroundContactPointMap())
          {
             String jointName = jointContactPoint.getLeft();
 
@@ -175,7 +179,7 @@ public class RobotDescriptionFromSDFLoader
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addForceSensorsIncludingDescendants(child, sdfJointNameMap);
+         addForceSensorsIncludingDescendants(child, jointNameMap);
       }
 
       return robotDescription;
@@ -184,15 +188,34 @@ public class RobotDescriptionFromSDFLoader
    private LinkDescription createLinkDescription(SDFLinkHolder link, RigidBodyTransform rotationTransform, boolean useCollisionMeshes)
    {
       LinkDescription scsLink = new LinkDescription(link.getName());
+
+      //TODO: Get collision meshes working.
       if (useCollisionMeshes)
       {
-         LinkGraphicsDescription linkGraphicsDescription = new SDFGraphics3DObject(link.getCollisions(), resourceDirectories, rotationTransform);
-
-         scsLink.setLinkGraphics(linkGraphicsDescription);
+         CollisionMeshDescription collisionMeshDescription = new SDFCollisionMeshDescription(link.getCollisions(), rotationTransform);
+         scsLink.setCollisionMesh(collisionMeshDescription);
       }
-      else if (link.getVisuals() != null)
+
+      if (link.getVisuals() != null)
       {
-         LinkGraphicsDescription linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+         LinkGraphicsDescription linkGraphicsDescription;
+
+         try
+         {
+            linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+         }
+         catch (Throwable e)
+         {
+            PrintTools.warn(this, "Could not load visuals for link " + link.getName() + "! Using an empty LinkGraphicsDescription.");
+
+            if(DEBUG)
+            {
+               e.printStackTrace();
+            }
+
+            linkGraphicsDescription = new LinkGraphicsDescription();
+         }
+
          scsLink.setLinkGraphics(linkGraphicsDescription);
       }
 
@@ -288,7 +311,7 @@ public class RobotDescriptionFromSDFLoader
             {
                if (!Double.isNaN(joint.getEffortLimit()))
                {
-                  pinJoint.setTorqueLimits(joint.getEffortLimit());
+                  pinJoint.setEffortLimit(joint.getEffortLimit());
                }
 
                if (!Double.isNaN(joint.getVelocityLimit()))
@@ -594,7 +617,7 @@ public class RobotDescriptionFromSDFLoader
       }
    }
 
-   private void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   private void addForceSensorsIncludingDescendants(SDFJointHolder joint, JointNameMap jointNameMap)
    {
       addForceSensor(joint, jointNameMap);
 
@@ -604,7 +627,7 @@ public class RobotDescriptionFromSDFLoader
       }
    }
 
-   private void addForceSensor(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   private void addForceSensor(SDFJointHolder joint, JointNameMap jointNameMap)
    {
       if (joint.getForceSensors().size() > 0)
       {

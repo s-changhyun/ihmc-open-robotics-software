@@ -7,30 +7,25 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
+import us.ihmc.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.avatar.handControl.HandCommandManager;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.NoArmsArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
-import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
@@ -38,15 +33,23 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParamet
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
@@ -73,22 +76,17 @@ public class BonoRobotModel implements DRCRobotModel
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
    private final BonoWalkingControllerParameters multiContactControllerParameters;
-   
+
    private boolean enableJointDamping = true;
+
+   private final RobotDescription robotDescription;
 
    public BonoRobotModel(boolean runningOnRealRobot, boolean headless)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       sensorInformation = new BonoSensorInformation();
 
-      if (headless)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true, null);
-      }
-      else
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false, null);
-      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), null);
 
       for (String forceSensorNames : getSensorInformation().getForceSensorNames())
       {
@@ -99,6 +97,25 @@ public class BonoRobotModel implements DRCRobotModel
       armControlParameters = new NoArmsArmControllerParameters();
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
       multiContactControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
+      robotDescription = createRobotDescription();
+   }
+
+   private RobotDescription createRobotDescription()
+   {
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
+
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
+      RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return robotDescription;
+   }
+
+   @Override
+   public RobotDescription getRobotDescription()
+   {
+      return robotDescription;
    }
 
    @Override
@@ -143,7 +160,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return new Transform();
    }
-   
+
    @Override
    public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
    {
@@ -172,7 +189,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new BonoInitialSetup(groundHeight, initialYaw);
    }
@@ -189,7 +206,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
    }
-   
+
    @Override
    public void setEnableJointDamping(boolean enableJointDamping)
    {
@@ -227,19 +244,20 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SDFFullHumanoidRobotModel createFullRobotModel()
+   public FullHumanoidRobotModel createFullRobotModel()
    {
-      return loader.createFullRobotModel(getJointMap());
+      return new FullHumanoidRobotModelFromDescription(robotDescription, jointMap, sensorInformation.getSensorFramesToTrack());
    }
 
    @Override
-   public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
-   { 
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      SDFHumanoidJointNameMap jointMap = getJointMap();
+      HumanoidJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
-      return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
    }
 
    @Override
@@ -260,8 +278,7 @@ public class BonoRobotModel implements DRCRobotModel
       return CONTROLLER_DT;
    }
 
-   @Override
-   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
+   private GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
@@ -288,6 +305,12 @@ public class BonoRobotModel implements DRCRobotModel
    public CapturePointPlannerParameters getCapturePointPlannerParameters()
    {
       return capturePointPlannerParameters;
+   }
+
+   @Override
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return null;
    }
 
    @Override
@@ -341,12 +364,6 @@ public class BonoRobotModel implements DRCRobotModel
       return null;
    }
 
-   @Override
-   public HeightCalculatorParameters getHeightCalculatorParameters()
-   {
-      return null;
-   }
-
    @Override public String getSimpleRobotName()
    {
       return "STEPPR";
@@ -369,13 +386,13 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
    }
-   
+
    @Override
    public SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
    {
       return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
-   
+
    @Override
    public double getStandPrepAngle(String jointName)
    {

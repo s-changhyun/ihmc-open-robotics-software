@@ -10,16 +10,16 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWobblyFootTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseWobblyFootTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    @Override

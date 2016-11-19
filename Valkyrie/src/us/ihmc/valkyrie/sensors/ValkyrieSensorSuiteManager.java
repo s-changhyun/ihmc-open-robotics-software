@@ -3,22 +3,20 @@ package us.ihmc.valkyrie.sensors;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.SCSPointCloudLidarReceiver;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -39,9 +37,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final DRCRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   private final SDFFullHumanoidRobotModelFactory fullRobotModelFactory;
+   private final FullHumanoidRobotModelFactory fullRobotModelFactory;
 
-   public ValkyrieSensorSuiteManager(SDFFullHumanoidRobotModelFactory fullRobotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+   public ValkyrieSensorSuiteManager(FullHumanoidRobotModelFactory fullRobotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;

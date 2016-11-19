@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Beige;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.DarkRed;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.LawnGreen;
+import static us.ihmc.graphics3DDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphics3DDescription.appearance.YoAppearance.Blue;
+import static us.ihmc.graphics3DDescription.appearance.YoAppearance.DarkRed;
+import static us.ihmc.graphics3DDescription.appearance.YoAppearance.LawnGreen;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -26,6 +25,11 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjector.ProjectionMethod;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -36,17 +40,12 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmartCMPProjectorTest
 {
    private static boolean showPlotter = false;
@@ -58,7 +57,7 @@ public class SmartCMPProjectorTest
 
    private final Random random = new Random(727434726273L);
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testNoProjection1()
    {
@@ -68,7 +67,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testNoProjection2()
    {
@@ -78,7 +77,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSimpleProjection1()
    {
@@ -88,7 +87,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSimpleProjection2()
    {
@@ -98,7 +97,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testDiffcultProjection1()
    {
@@ -108,7 +107,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testDiffcultProjection2()
    {
@@ -118,7 +117,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testDiffcultProjection3()
    {
@@ -128,7 +127,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase1()
    {
@@ -138,7 +137,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase1WithFinalDesired1()
    {
@@ -149,7 +148,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, expectedProjection, finalICP, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase1WithFinalDesired2()
    {
@@ -166,7 +165,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase2()
    {
@@ -181,7 +180,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, null, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase2WithFinalDesired1()
    {
@@ -198,7 +197,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase2WithFinalDesired2()
    {
@@ -214,7 +213,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase2WithFinalDesired3()
    {
@@ -230,7 +229,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase3()
    {
@@ -245,7 +244,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, null, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase3WithFinalDesired1()
    {
@@ -261,7 +260,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase3WithFinalDesired2()
    {
@@ -277,7 +276,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase3WithFinalDesired3()
    {
@@ -293,7 +292,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase4()
    {
@@ -308,7 +307,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, null, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase4WithFinalDesired1()
    {
@@ -324,7 +323,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, finalICP, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testQuestionableCase5()
    {
@@ -339,7 +338,7 @@ public class SmartCMPProjectorTest
       doTest(makeFootPolygon(), capturePoint, desiredCMP, null, null, expectedArea);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSmallPolygon1()
    {
@@ -353,7 +352,7 @@ public class SmartCMPProjectorTest
       doTest(footPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSmallPolygon2()
    {
@@ -367,7 +366,7 @@ public class SmartCMPProjectorTest
       doTest(projectionArea, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testNoProjectionGenerated()
    {
@@ -390,7 +389,7 @@ public class SmartCMPProjectorTest
    }
 
    // tests for manual debugging - will always pass but plots can be generated
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRandoms()
    {
@@ -421,7 +420,7 @@ public class SmartCMPProjectorTest
    }
 
    // old tests from previous SmartCMPProjector implementation: these serve as regression tests
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression1()
    {
@@ -435,7 +434,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression2()
    {
@@ -450,7 +449,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression3()
    {
@@ -465,7 +464,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression4()
    {
@@ -479,7 +478,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression5()
    {
@@ -493,7 +492,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression6()
    {
@@ -508,7 +507,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression7()
    {
@@ -522,7 +521,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression8()
    {
@@ -536,7 +535,7 @@ public class SmartCMPProjectorTest
       doTest(supportPolygon, capturePoint, desiredCMP, expectedCMP, null, null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRegression9()
    {
@@ -628,10 +627,14 @@ public class SmartCMPProjectorTest
          success = projectedCMP.epsilonEquals(expectedProjection, epsilon);
       else if (expectedArea != null)
          success = expectedArea.isPointInside(projectedCMP, epsilon);
-      boolean wasProjected = !projectedCMP.epsilonEquals(desiredCMP, epsilon);
+
+      boolean correctInfo = true;
+      boolean cmpMoved = !projectedCMP.epsilonEquals(desiredCMP, epsilon);
+      if (!projector.getWasCMPProjected() && cmpMoved)
+         correctInfo = false;
 
       // show overhead results if required
-      if ((!success && showPlotterOnFail) || (!directionPreserved && showPlotterOnDirectionChange) || showPlotter)
+      if ((!success && showPlotterOnFail) || (!correctInfo && showPlotterOnFail) || (!directionPreserved && showPlotterOnDirectionChange) || showPlotter)
       {
          YoFramePoint2d yoCapturePoint = new YoFramePoint2d("CapturePoint", worldFrame, registry);
          YoArtifactPosition capturePointViz = new YoArtifactPosition("Capture Point", yoCapturePoint, GraphicType.BALL_WITH_ROTATED_CROSS, Blue().getAwtColor(),
@@ -704,7 +707,7 @@ public class SmartCMPProjectorTest
       if (expectedArea != null && expectedProjection != null)
          assertTrue("Expected conditions were not compatibe.", expectedArea.isPointInside(expectedProjection, epsilon));
       assertFalse("This test does not have a fail condition.", expectedArea == null && expectedProjection == null);
-      assertEquals("CMP was changed but projector claimed it wasn't projected.", wasProjected, projector.getWasCMPProjected());
+      assertTrue("CMP was changed but projector claimed it wasn't projected.", correctInfo);
       assertTrue("Projection of CMP did not equal expected.", success);
    }
 

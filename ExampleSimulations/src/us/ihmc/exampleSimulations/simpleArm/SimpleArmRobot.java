@@ -6,8 +6,8 @@ import java.util.Random;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -228,8 +228,8 @@ public class SimpleArmRobot extends Robot
       {
          OneDoFJoint idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
-         idJoint.setQ(scsJoint.getQ().getDoubleValue());
-         idJoint.setQd(scsJoint.getQD().getDoubleValue());
+         idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
+         idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
       }
       bodyMap.get(ArmBody.ELEVATOR).updateFramesRecursively();
    }

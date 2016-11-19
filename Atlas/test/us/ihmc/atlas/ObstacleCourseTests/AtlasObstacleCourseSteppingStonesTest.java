@@ -4,17 +4,17 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 // moved to in development
 // this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
    @Override
@@ -30,7 +30,7 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 48.9)
+   @ContinuousIntegrationTest(estimatedDuration = 48.9)
    @Test(timeout = 240000)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {

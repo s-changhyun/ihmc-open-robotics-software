@@ -7,13 +7,13 @@ import org.junit.Test;
 import us.ihmc.llaQuadruped.LLAQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlVelocityTest;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class LLAQuadrupedPositionCrawlVelocityTest extends QuadrupedPositionCrawlVelocityTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlVelocityTest extends QuadrupedPositionCraw
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 90.0)
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 600000)
    public void testWalkingForward() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedPositionCrawlVelocityTest extends QuadrupedPositionCraw
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 600000)
    public void testWalkingBackward() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

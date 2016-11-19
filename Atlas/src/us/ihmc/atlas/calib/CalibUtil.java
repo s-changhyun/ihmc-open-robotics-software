@@ -1,22 +1,20 @@
 package us.ihmc.atlas.calib;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.so.Rodrigues_F64;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.so.Rodrigues_F64;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CalibUtil
 {
@@ -53,7 +51,7 @@ public class CalibUtil
       return jointNames;
    }
 
-   public static void setRobotModelFromData(SDFFullRobotModel fullRobotModel, Map<String, Double> qmap)
+   public static void setRobotModelFromData(FullRobotModel fullRobotModel, Map<String, Double> qmap)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 
@@ -71,7 +69,7 @@ public class CalibUtil
       }
    }
 
-   public static void setRobotModelFromData(SDFFullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
+   public static void setRobotModelFromData(FullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 
@@ -104,7 +102,7 @@ public class CalibUtil
 
    public static Vector3d matrix3dToAxisAngle3d(DenseMatrix64F md)
    {
-      Rodrigues_F64 r = RotationMatrixGenerator.matrixToRodrigues(md, (Rodrigues_F64)null);
+      Rodrigues_F64 r = ConvertRotation3D_F64.matrixToRodrigues(md, (Rodrigues_F64)null);
       r.unitAxisRotation.scale(r.theta);
       Vector3d angleAxis = new Vector3d(r.unitAxisRotation.x, r.unitAxisRotation.y, r.unitAxisRotation.z);
       return angleAxis;

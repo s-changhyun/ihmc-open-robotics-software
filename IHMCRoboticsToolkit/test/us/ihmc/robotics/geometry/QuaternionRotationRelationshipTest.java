@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
@@ -13,7 +13,7 @@ import java.util.Random;
 public class QuaternionRotationRelationshipTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testQuaternionRotationRelationship()
    {

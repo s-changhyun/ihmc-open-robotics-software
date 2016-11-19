@@ -1,26 +1,26 @@
 package us.ihmc.imageProcessing.sfm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.StereoParameters;
+import georegression.geometry.ConvertRotation3D_F64;
 import georegression.geometry.GeometryMath_F64;
-import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.EulerType;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import java.util.Random;
-
 import org.ddogleg.struct.FastQueue;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.struct.calib.IntrinsicParameters;
-import boofcv.struct.calib.StereoParameters;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Peter Abeles
@@ -32,7 +32,7 @@ public class EstimateGroundPlaneFromFeaturesTest
     * Create a set of observations with perfect data and see if it can reconstruct the plane and transform
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void perfect()
    {
@@ -59,7 +59,7 @@ public class EstimateGroundPlaneFromFeaturesTest
       DenseMatrix64F K = PerspectiveOps.calibrationMatrix(param.getLeft(), null);
 
       // rotate the plane.  rotation from plane reference into camera reference
-      DenseMatrix64F R = RotationMatrixGenerator.eulerXYZ(0.2, 0, 0, null);
+      DenseMatrix64F R = ConvertRotation3D_F64.eulerToMatrix(EulerType.XYZ, 0.2, 0, 0, null);
 
       for( int i = 0; i < 100; i++ ) {
          Point3D_F64 X = new Point3D_F64();

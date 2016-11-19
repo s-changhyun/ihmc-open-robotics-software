@@ -1,12 +1,12 @@
 package us.ihmc.steppr.simulation;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.steppr.parameters.BonoRobotModel;
@@ -28,14 +28,14 @@ public class StepprFlatGroundCircularWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       DRCFlatGroundWalkingTrack flatGroundWalkingTrack=new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                     useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
-      flatGroundWalkingTrack.getDrcSimulation().start();
-      flatGroundWalkingTrack.getDrcSimulation().simulate();
+      flatGroundWalkingTrack.getAvatarSimulation().start();
+      flatGroundWalkingTrack.getAvatarSimulation().simulate();
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
       
       scs.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot").setValueFromDouble(0.1); 

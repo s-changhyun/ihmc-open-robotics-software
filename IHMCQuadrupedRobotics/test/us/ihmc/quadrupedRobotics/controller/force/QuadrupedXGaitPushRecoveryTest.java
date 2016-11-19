@@ -15,11 +15,12 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRobotTestInterface
 {
@@ -34,6 +35,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
 
       try
       {
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -58,14 +60,14 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingForwardFastWithPush()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
-      variables.getYoPlanarVelocityInputX().set(1.0);
+      variables.getYoPlanarVelocityInputX().set(0.8);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

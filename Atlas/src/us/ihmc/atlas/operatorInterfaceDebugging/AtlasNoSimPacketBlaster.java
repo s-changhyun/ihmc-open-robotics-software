@@ -9,14 +9,14 @@ import java.util.concurrent.TimeUnit;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -39,7 +39,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
    private AtlasRobotModel atlasRobotModel;
    private boolean includeFingerJoints;
    private OneDoFJoint[] jointList;
-   private SDFFullHumanoidRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
    private int numberOfJoints;
    private double[] jointLowerLimits;
    private double[] jointUpperLimits;

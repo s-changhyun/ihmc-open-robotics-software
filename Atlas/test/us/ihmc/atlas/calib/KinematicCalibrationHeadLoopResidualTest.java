@@ -18,28 +18,28 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Test;
 
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
@@ -50,12 +50,12 @@ public class KinematicCalibrationHeadLoopResidualTest
    Random random = new Random(23234);
 
    IntrinsicParameters intrinsic;
-   PlanarCalibrationDetector calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(
+   CalibrationDetectorChessboard calibGrid = FactoryCalibrationTarget.detectorChessboard(new ConfigChessboard(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
-   SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+   FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
 
@@ -104,7 +104,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -154,7 +154,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -208,7 +208,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {
@@ -292,7 +292,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       }
    }
 
-   private RigidBodyTransform computeKinematicsTargetToCamera(SDFFullHumanoidRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, RigidBodyTransform targetToEE)
+   private RigidBodyTransform computeKinematicsTargetToCamera(FullHumanoidRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, RigidBodyTransform targetToEE)
    {
 
       ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);

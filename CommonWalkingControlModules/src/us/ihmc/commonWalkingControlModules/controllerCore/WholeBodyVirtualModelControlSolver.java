@@ -1,21 +1,25 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.ControlledBodiesCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -40,7 +44,7 @@ public class WholeBodyVirtualModelControlSolver
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
 
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
@@ -195,11 +199,13 @@ public class WholeBodyVirtualModelControlSolver
       // submit virtual wrenches for bodies not in contact
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
-         virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
+         VirtualWrenchCommand virtualWrenchCommand = virtualWrenchCommandList.getCommand(i);
          if (!bodiesInContact.contains(virtualWrenchCommand.getControlledBody()))
          {
             if (controlledBodies.contains(virtualWrenchCommand.getControlledBody()))
+            {
                virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
+            }
             else
                PrintTools.warn(this, "Received a command for " + virtualWrenchCommand.getControlledBody().getName() + ", which is not registered. Skipping this body.");
          }
@@ -282,8 +288,50 @@ public class WholeBodyVirtualModelControlSolver
          case COMMAND_LIST:
             submitVirtualModelControlCommandList((InverseDynamicsCommandList) command);
             break;
+         case JOINTSPACE:
+            handleJointSpaceCommand((JointspaceAccelerationCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Jacobian Transpose solver mode.");
+         }
+      }
+   }
+
+   private FrameVector tempFrameVector = new FrameVector();
+   private DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE);
+   private void handleJointSpaceCommand(JointspaceAccelerationCommand command)
+   {
+      if(command.getHasWeight())
+      {
+         for(int i = 0; i < command.getNumberOfJoints(); i++)
+         {
+            DenseMatrix64F desiredAcceleration = command.getDesiredAcceleration(i);
+            double acceleration = desiredAcceleration.get(0, 0);
+            OneDoFJoint joint = (OneDoFJoint) command.getJoint(i);
+            RigidBody controlledBody = joint.getSuccessor();
+            
+            double torque = acceleration * controlledBody.getInertia().getMass();
+            joint.getJointAxis(tempFrameVector);
+            tempFrameVector.scale(torque);
+            
+            tmpWrench.setToZero(tempFrameVector.getReferenceFrame(), tempFrameVector.getReferenceFrame());
+            tmpWrench.setAngularPart(tempFrameVector);
+            tmpWrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
+            tmpWrench.changeFrame(ReferenceFrame.getWorldFrame());
+
+            VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+            virtualWrenchCommand.set(controlledBody, tmpWrench, selectionMatrix);
+            virtualWrenchCommandList.addCommand(virtualWrenchCommand);
+
+            if (controlledBody == controlRootBody)
+            {
+               tmpExternalWrench.set(tmpWrench);
+               tmpExternalWrench.negate();
+               tmpExternalWrench.changeFrame(controlledBody.getBodyFixedFrame());
+               optimizationControlModule.submitExternalWrench(controlledBody, tmpExternalWrench);
+            }
+
+            optimizationControlModule.addSelection(selectionMatrix);
          }
       }
    }
@@ -319,6 +367,7 @@ public class WholeBodyVirtualModelControlSolver
       {
          tmpExternalWrench.set(tmpWrench);
          tmpExternalWrench.negate();
+         tmpExternalWrench.changeFrame(controlledBody.getBodyFixedFrame());
          optimizationControlModule.submitExternalWrench(controlledBody, tmpExternalWrench);
       }
 

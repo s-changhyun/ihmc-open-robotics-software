@@ -6,32 +6,32 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DFrameListener;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.jme.lidar.JMEGPULidar;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.FlatHeightMap;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.geometry.TransformTools;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGPULidarParallelSceneGraphTest
 {
    /**
     * The blue sphere should not show up in the lidar data.
     */
 
-	@DeployableTestMethod(estimatedDuration = 10.2)
+	@ContinuousIntegrationTest(estimatedDuration = 10.2)
 	@Test(timeout = 51000)
    public void testGPULidarParallelSceneGraph()
    {

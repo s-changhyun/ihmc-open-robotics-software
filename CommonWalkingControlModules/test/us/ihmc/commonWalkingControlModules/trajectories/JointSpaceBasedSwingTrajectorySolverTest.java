@@ -22,17 +22,17 @@ import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Created by agrabertilton on 2/5/15.
  */
-@DeployableTestClass(targets = {TestPlanTarget.Exclude})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class JointSpaceBasedSwingTrajectorySolverTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testOneDoFTrajectory()
    {
@@ -102,7 +102,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testPendulumTrajectory()
    {

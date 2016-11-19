@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
@@ -23,6 +24,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.robotics.robotDescription.SpringPinJointDescription;
 import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -53,6 +55,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
    {
       super(description.getName());
       constructRobotFromDescription(description);
+
+//      System.out.println(this);
    }
 
    public Joint getJoint(String jointName)
@@ -186,6 +190,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), this);
          cameraMount.setImageWidth(cameraSensorDescription.getImageWidth());
          cameraMount.setImageHeight(cameraSensorDescription.getImageHeight());
+         cameraMount.setFieldOfView(cameraSensorDescription.getFieldOfView());
 
          joint.addCameraMount(cameraMount);
 
@@ -323,7 +328,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
          if (jointDescription.isDynamic())
          {
-            joint = new PinJoint(jointDescription.getName(), offset, this, pinJointDescription.getJointAxis());
+            Vector3d jointAxis = new Vector3d();
+            pinJointDescription.getJointAxis(jointAxis);
+            joint = new PinJoint(jointDescription.getName(), offset, this, jointAxis);
 
             PinJoint pinJoint = (PinJoint) joint;
 
@@ -338,11 +345,45 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
                pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
             }
+
+            pinJoint.setDamping(pinJointDescription.getDamping());
+            pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+            pinJoint.setStiction(pinJointDescription.getStiction());
          }
          else
          {
-            joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, pinJointDescription.getJointAxis());
+            Vector3d jointAxis = new Vector3d();
+            pinJointDescription.getJointAxis(jointAxis);
+            joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, jointAxis);
          }
+      }
+      else if (jointDescription instanceof SpringPinJointDescription)
+      {
+         SpringPinJointDescription pinJointDescription = (SpringPinJointDescription) jointDescription;
+         Vector3d offset = new Vector3d();
+         pinJointDescription.getOffsetFromParentJoint(offset);
+
+         Vector3d jointAxis = new Vector3d();
+         pinJointDescription.getJointAxis(jointAxis);
+         joint = new SpringPinJoint(jointDescription.getName(), offset, this, jointAxis);
+
+         SpringPinJoint pinJoint = (SpringPinJoint) joint;
+
+         if (pinJointDescription.containsLimitStops())
+         {
+            double[] limitStopParameters = pinJointDescription.getLimitStopParameters();
+
+            double qMin = limitStopParameters[0];
+            double qMax = limitStopParameters[1];
+            double kLimit = limitStopParameters[2];
+            double bLimit = limitStopParameters[3];
+
+            pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
+         }
+
+         pinJoint.setDamping(pinJointDescription.getDamping());
+         pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+         pinJoint.setStiction(pinJointDescription.getStiction());
       }
       else if (jointDescription instanceof SliderJointDescription)
       {
@@ -350,7 +391,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          Vector3d offset = new Vector3d();
          sliderJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new SliderJoint(jointDescription.getName(), offset, this, sliderJointDescription.getJointAxis());
+         Vector3d jointAxis = new Vector3d();
+         sliderJointDescription.getJointAxis(jointAxis);
+         joint = new SliderJoint(jointDescription.getName(), offset, this, jointAxis);
 
          SliderJoint sliderJoint = (SliderJoint) joint;
 
@@ -393,7 +436,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       LinkGraphicsDescription linkGraphics = linkDescription.getLinkGraphics();
       link.setLinkGraphics(linkGraphics);
 
-      return link;
+      CollisionMeshDescription collisonMeshDescription = linkDescription.getCollisionMesh();
+      link.setCollisionMesh(collisonMeshDescription);
 
+      return link;
    }
 }

@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -21,11 +21,11 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime; // hardcoded, to be determined
    private final BooleanYoVariable trajectoryTimeElapsed;
 
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 
-   public HandDesiredConfigurationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
+   public HandDesiredConfigurationBehavior(String name, CommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
    {
-      super(outgoingCommunicationBridgeInterface);
+      super(name,outgoingCommunicationBridgeInterface);
       this.yoTime = yoTime;
 
       hasInputBeenSet = new BooleanYoVariable(getName() + "hasInputBeenSet", registry);
@@ -57,14 +57,14 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
    private void sendHandDesiredConfigurationToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
 
 //         sendPacketToController(outgoingHandDesiredConfigurationMessage);
          
          outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.BROADCAST);
          
-         sendPacketToNetworkProcessor(outgoingHandDesiredConfigurationMessage);
+         sendPacket(outgoingHandDesiredConfigurationMessage);
          hasPacketBeenSet.set(true);
          startTime.set(yoTime.getDoubleValue());
 
@@ -73,33 +73,21 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
 
    @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   public void stop()
+   public void abort()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
          HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopMessage.setDestination(PacketDestination.UI);
          sendPacketToController(stopMessage);
-         sendPacketToNetworkProcessor(stopMessage);
+         sendPacket(stopMessage);
       }
-      isStopped.set(true);
+      isAborted.set(true);
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+  
 
    @Override
    public void pause()
@@ -109,7 +97,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
          HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopMessage.setDestination(PacketDestination.UI);
          sendPacketToController(stopMessage);
-         sendPacketToNetworkProcessor(stopMessage);
+         sendPacket(stopMessage);
       }
       isPaused.set(true);
 
@@ -138,7 +126,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       else
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() && !isAborted.getBooleanValue();
    }
 
    @Override
@@ -152,7 +140,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       hasPacketBeenSet.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       trajectoryTime.set(1.0); //TODO hardCoded to be determined
 
       trajectoryTimeElapsed.set(false);
@@ -165,14 +153,13 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       hasPacketBeenSet.set(false);
       outgoingHandDesiredConfigurationMessage = null;
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);
       trajectoryTimeElapsed.set(false);
    }
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

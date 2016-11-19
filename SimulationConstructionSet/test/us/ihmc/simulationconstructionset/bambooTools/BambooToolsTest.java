@@ -3,20 +3,22 @@ package us.ihmc.simulationconstructionset.bambooTools;
 import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class BambooToolsTest
 {
-   private static final boolean SHOW_GUI = false;
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   private static final boolean SHOW_GUI = true;
+   
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetClassAndMethodName()
    {
@@ -27,7 +29,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = { TestPlanTarget.UI })
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = { IntegrationCategory.UI })
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {
@@ -41,27 +43,19 @@ public class BambooToolsTest
       BambooTools.reportParameterMessage("ParameterMessage2", SHOW_GUI);
       
       BambooTools.reportTestFinishedMessage(SHOW_GUI);
+      
+      Path path = Paths.get("testResources/us/ihmc/simulationconstructionset/bambooTools/testMessages.txt");
+      BambooTools.logMessagesToFile(path.toFile());
 
-      File file = new File("testMessages.txt");
-      BambooTools.logMessagesToFile(file);
-
-      FileInputStream fileInputStream = new FileInputStream(file);
+      FileInputStream fileInputStream = new FileInputStream(path.toString());
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
 
-      StringBuilder builder = new StringBuilder();
-      
-      while(true)
+      String readLine = bufferedReader.readLine();
+      while((readLine = bufferedReader.readLine()) != null)
       {
-         String readLine = bufferedReader.readLine();
-         if (readLine == null) break;
-
-         builder.append(readLine);
+         System.out.println(readLine);
       }
       
-      System.out.println(builder.toString());
       bufferedReader.close();
-      
-      file.delete();
    }
-
 }

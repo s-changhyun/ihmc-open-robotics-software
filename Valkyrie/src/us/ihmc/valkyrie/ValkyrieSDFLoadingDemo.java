@@ -6,18 +6,18 @@ import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Created by dstephen on 2/7/14.
@@ -33,7 +33,7 @@ public class ValkyrieSDFLoadingDemo
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
-      FloatingRootJointRobot valkyrieRobot = robotModel.createSdfRobot(false);
+      FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
 
       if (SHOW_ELLIPSOIDS)
@@ -44,10 +44,10 @@ public class ValkyrieSDFLoadingDemo
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
          addJointAxis(valkyrieRobot);
 
-      SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
+      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(fullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
 
 

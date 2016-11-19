@@ -2,14 +2,14 @@ package us.ihmc.atlas.stateEstimation;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionEndToEndTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionEndToEndTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrectionEndToEndTest
 {
 

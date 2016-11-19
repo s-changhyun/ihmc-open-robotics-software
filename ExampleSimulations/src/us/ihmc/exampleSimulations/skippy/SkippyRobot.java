@@ -9,8 +9,8 @@ import javax.vecmath.Vector3d;
 import com.vividsolutions.jts.math.Vector3D;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class SkippyRobot extends Robot
 {
-   private static final boolean SHOW_MOI_ELLIPSOIDS = true;
+   private static final boolean SHOW_MOI_ELLIPSOIDS = false;
 
    private static final long serialVersionUID = -7671864179791904256L;
 
@@ -126,7 +126,7 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = 0.2 * Math.PI / 48.0;
+   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0; //0.2
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
    private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 
@@ -211,6 +211,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
+         shoulderJoint.setDamping(0.1);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
          Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
@@ -223,6 +224,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
+         hipJoint.setDamping(0.0);//2.5);//0.1);
          hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
@@ -270,8 +272,9 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
-
-      // associate the linkGraphics object with the link object
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       leg.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -293,9 +296,16 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
-
-      // associate the linkGraphics object with the link object
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.White());//Glass(0.75));//
+      /*
+       * Joint
+       */
+      linkGraphics.rotate(Math.PI/2,Axis.Y);
+      linkGraphics.translate(-LEG_LENGTH+LEG_CUBE_LENGTH/3, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       leg.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -314,9 +324,11 @@ public class SkippyRobot extends Robot
       torso.setMomentOfInertia(TORSO_MOI, TORSO_MOI, 0.0001);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
+      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Glass(0.75));
       linkGraphics.addSphere(0.10, YoAppearance.White());
-
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       torso.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -336,8 +348,10 @@ public class SkippyRobot extends Robot
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -TORSO_LENGTH / 2);
-      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
-
+      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Blue());
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       torso.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -356,9 +370,19 @@ public class SkippyRobot extends Robot
       arms.setMomentOfInertia(0.0001, SHOULDER_MOI, SHOULDER_MOI);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.toRadians(90), Axis.Y);
+      linkGraphics.rotate(Math.toRadians(90), Axis.Y);	
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
-      linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.DarkBlue());
+      linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.Red());
+      /*
+       * Joint
+       */
+      linkGraphics.rotate(Math.PI/2,Axis.Y);
+      linkGraphics.rotate(Math.PI/2,Axis.X);
+      linkGraphics.translate(-SHOULDER_LENGTH/2, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       arms.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -491,6 +515,29 @@ public class SkippyRobot extends Robot
    public double getMass()
    {
       return SHOULDER_MASS+LEG_MASS+TORSO_MASS;
+   }
+
+   public DoubleYoVariable getQdd_z()
+   {
+      // TODO Auto-generated method stub
+      return rootJointIfSkippy.qdd_z;
+   }
+
+   public DoubleYoVariable getQ_hip()
+   {
+      // TODO Auto-generated method stub
+      return hipJoint.getQYoVariable();
+   }
+
+   public DoubleYoVariable getQd_hip()
+   {
+      // TODO Auto-generated method stub
+      return hipJoint.getQDYoVariable();
+   }
+   public DoubleYoVariable getQdd_hip()
+   {
+      // TODO Auto-generated method stub
+      return hipJoint.getQDDYoVariable();
    }
 
 }

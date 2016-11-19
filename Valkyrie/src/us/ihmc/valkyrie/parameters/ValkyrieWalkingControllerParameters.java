@@ -8,15 +8,15 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -236,12 +236,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          // On the real robot, return all 3 so it knows to use them all. The real robot will use position control.
 //         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
          // For now the neck is not controllable
-         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+         return new String[] {jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW)};
       }
 
       // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
       // don't do well with redundant joints yet. We'll have to fix that later some how.
-      else return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+      else return new String[] {jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW)};
    }
 
    @Override
@@ -1005,6 +1005,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
+   public boolean useOptimizationBasedICPController()
+   {
+      return false;
+   }
+
+   @Override
    public void useInverseDynamicsControlCore()
    {
       // once another mode is implemented, use this to change the default gains for inverse dynamics
@@ -1024,4 +1030,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
       return target == RobotTarget.REAL_ROBOT;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSwingTrajectoryOptimizer()
+   {
+      return true;
+   }
+
 }

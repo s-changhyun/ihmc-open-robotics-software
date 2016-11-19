@@ -1,12 +1,12 @@
 package us.ihmc.valkyrie;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCInverseDynamicsCalculatorTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCInverseDynamicsCalculatorTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = {TestPlanTarget.Exclude})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class ValkyrieInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalculatorTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);

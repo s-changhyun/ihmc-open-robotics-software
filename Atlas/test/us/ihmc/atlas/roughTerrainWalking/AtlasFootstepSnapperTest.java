@@ -10,29 +10,29 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.FootstepParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperTest;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperSimulationTest;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * Created by agrabertilton on 3/4/15.
  */
-public class AtlasFootstepSnapperTest extends FootstepSnapperTest
+public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {

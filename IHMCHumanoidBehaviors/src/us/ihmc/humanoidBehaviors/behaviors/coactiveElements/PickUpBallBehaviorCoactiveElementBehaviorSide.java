@@ -1,14 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 
-import us.ihmc.humanoidBehaviors.behaviors.PickUpBallBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 
 public class PickUpBallBehaviorCoactiveElementBehaviorSide extends PickUpBallBehaviorCoactiveElement
 {
-   private PickUpBallBehavior pickUpBallBehavior;
+   private PickUpBallBehaviorStateMachine pickUpBallBehavior;
 //   private HSVRange currentHSVRange = null;
 
-   public void setPickUpBallBehavior(PickUpBallBehavior pickUpBallBehavior)
+   public void setPickUpBallBehavior(PickUpBallBehaviorStateMachine pickUpBallBehavior)
    {
       this.pickUpBallBehavior = pickUpBallBehavior;
    }

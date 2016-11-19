@@ -7,16 +7,17 @@ import us.ihmc.robotics.Axis;
 public class OneDoFJointDescription extends JointDescription
 {
    private boolean containsLimitStops;
-   private double qMin, qMax, kLimit, bLimit;
+   private double qMin = Double.NEGATIVE_INFINITY;
+   private double qMax = Double.POSITIVE_INFINITY;
+   private double kLimit, bLimit;
 
-   private double maxTorqueLimit = Double.POSITIVE_INFINITY;
-   private double minTorqueLimit = Double.NEGATIVE_INFINITY;
+   private double effortLimit = Double.POSITIVE_INFINITY;
 
    private double velocityLimit = Double.POSITIVE_INFINITY;
-   private double velocityDamping = 0.0;
+   private double velocityDamping;
 
-   private double damping = 0.0;
-   private double stiction = 0.0;
+   private double damping;
+   private double stiction;
 
    private final Vector3d jointAxis = new Vector3d();
 
@@ -50,7 +51,6 @@ public class OneDoFJointDescription extends JointDescription
       this.jointAxis.set(jointAxis);
    }
 
-
    public void setVelocityLimits(double velocityLimit, double velocityDamping)
    {
       this.velocityLimit = velocityLimit;
@@ -60,6 +60,26 @@ public class OneDoFJointDescription extends JointDescription
    public void setDamping(double damping)
    {
       this.damping = damping;
+   }
+
+   public double getDamping()
+   {
+      return damping;
+   }
+
+   public double getStiction()
+   {
+      return stiction;
+   }
+
+   public double getVelocityLimit()
+   {
+      return velocityLimit;
+   }
+
+   public double getVelocityDamping()
+   {
+      return velocityDamping;
    }
 
    public void setStiction(double stiction)
@@ -76,9 +96,9 @@ public class OneDoFJointDescription extends JointDescription
       this.bLimit = bLimit;
    }
 
-   public Vector3d getJointAxis()
+   public void getJointAxis(Vector3d jointAxisToPack)
    {
-      return jointAxis;
+      jointAxisToPack.set(jointAxis);
    }
 
    public boolean containsLimitStops()
@@ -88,33 +108,26 @@ public class OneDoFJointDescription extends JointDescription
 
    public double[] getLimitStopParameters()
    {
-      return new double[]{qMin, qMax, kLimit, bLimit};
+      return new double[] { qMin, qMax, kLimit, bLimit };
    }
 
-   public void setTorqueLimits(double torqueLimit)
+   public double getLowerLimit()
    {
-      this.setMaxTorqueLimit(Math.abs(torqueLimit));
-      this.setMinTorqueLimit(-Math.abs(torqueLimit));
+      return qMin;
    }
 
-   public double getMaxTorqueLimit()
+   public double getUpperLimit()
    {
-      return maxTorqueLimit;
+      return qMax;
    }
 
-   public void setMaxTorqueLimit(double maxTorqueLimit)
+   public void setEffortLimit(double effortLimit)
    {
-      this.maxTorqueLimit = maxTorqueLimit;
+      this.effortLimit = effortLimit;
    }
 
-   public double getMinTorqueLimit()
+   public double getEffortLimit()
    {
-      return minTorqueLimit;
+      return effortLimit;
    }
-
-   public void setMinTorqueLimit(double minTorqueLimit)
-   {
-      this.minTorqueLimit = minTorqueLimit;
-   }
-
 }

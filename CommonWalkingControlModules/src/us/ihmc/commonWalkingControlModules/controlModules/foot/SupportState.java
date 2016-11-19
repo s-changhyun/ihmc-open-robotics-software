@@ -5,8 +5,6 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
@@ -15,7 +13,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -28,11 +27,8 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * This is the active foot state when the foot is in flat support. Usually the command to the QP
@@ -60,8 +56,6 @@ public class SupportState extends AbstractFootControlState
    private final PoseReferenceFrame controlFrame;
    private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
-
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
@@ -163,14 +157,6 @@ public class SupportState extends AbstractFootControlState
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       updateHoldPositionSetpoints();
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE), PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
-
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    @Override
@@ -297,22 +283,23 @@ public class SupportState extends AbstractFootControlState
       desiredPosition.checkReferenceFrameMatch(footPosition);
       desiredOrientation.checkReferenceFrameMatch(footOrientation);
 
-      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue())
-      {
+      // The z component is always updated as it is never held in place
+      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
+      { // Only the z component is not held
          desiredPosition.setZ(footPosition.getZ());
       }
-      else if (footBarelyLoaded.getBooleanValue())
-      {
+      else if (footBarelyLoaded.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded)
+      { // Update pitch and roll for when the CoP will get on the edge, and z as always
          desiredPosition.setZ(footPosition.getZ());
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), footOrientation.getPitch(), footOrientation.getRoll());
       }
-      else if (copOnEdge.getBooleanValue())
-      {
+      else if (copOnEdge.getBooleanValue()) // => Holding Pitch-Roll-Components (cuz CoP on edge)
+      { // Update X-Y-Z and yaw for next time the foot will be barely loaded
          desiredPosition.set(footPosition);
          desiredOrientation.setYawPitchRoll(footOrientation.getYaw(), desiredOrientation.getPitch(), desiredOrientation.getRoll());
       }
-      else
-      {
+      else // Not holding anything
+      { // Update the full pose.
          desiredPosition.set(footPosition);
          desiredOrientation.set(footOrientation);
       }
@@ -336,8 +323,6 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
-      inverseDymamicsCommandsList.addCommand(privilegedConfigurationCommand);
-
       return inverseDymamicsCommandsList;
    }
 

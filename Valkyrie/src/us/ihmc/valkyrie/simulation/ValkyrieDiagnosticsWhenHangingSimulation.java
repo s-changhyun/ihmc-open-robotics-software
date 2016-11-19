@@ -8,13 +8,13 @@ import javax.swing.JButton;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.avatar.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
-import us.ihmc.darpaRoboticsChallenge.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
@@ -35,7 +35,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(DRCRobotModel.RobotTarget.SCS, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
 //      humanoidJointPoseList.createPoseSetters();
@@ -296,9 +296,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       }
       
       @Override
-      public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
       {
-         SDFHumanoidRobot robot = super.createSdfRobot(createCollisionMeshes);
+         HumanoidFloatingRootJointRobot robot = super.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
          
          Joint joint = robot.getJoint("torsoRoll");
          

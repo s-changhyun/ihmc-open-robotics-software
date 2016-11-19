@@ -7,13 +7,13 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.input.SelectedListener;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
@@ -180,13 +180,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
       yoGraphicsListRegistries.add(graphListRegistry);
       
-      valvePinJoint.getQ().addVariableChangedListener(new VariableChangedListener()
+      valvePinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
       {
          
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            valveClosePercentage.set(valvePinJoint.getQ().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
+            valveClosePercentage.set(valvePinJoint.getQYoVariable().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
          }
       });
    }
@@ -196,7 +196,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    {
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newValvePose = new RigidBodyTransform();
-      pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQ().getDoubleValue());
+      pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQYoVariable().getDoubleValue());
       newValvePose.multiply(originalValvePose, pinJointTransform);
       valveFrame.setPoseAndUpdate(newValvePose);
 

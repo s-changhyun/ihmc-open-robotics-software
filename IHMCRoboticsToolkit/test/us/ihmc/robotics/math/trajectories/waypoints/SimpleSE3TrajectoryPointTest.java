@@ -27,12 +27,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPoin
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SimpleSE3TrajectoryPointTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
@@ -51,7 +51,7 @@ public class SimpleSE3TrajectoryPointTest
       double time = 3.4;
       Point3d position = new Point3d(1.0, 2.1, 3.7);
       TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
-      orientation.normalizeAndLimitToPiMinusPi();
+      orientation.normalize();
 
       Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
       Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
@@ -81,7 +81,7 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedSimpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -156,7 +156,7 @@ public class SimpleSE3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -254,7 +254,7 @@ public class SimpleSE3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -286,7 +286,7 @@ public class SimpleSE3TrajectoryPointTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
@@ -329,7 +329,7 @@ public class SimpleSE3TrajectoryPointTest
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
@@ -416,7 +416,7 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
@@ -544,7 +544,7 @@ public class SimpleSE3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {

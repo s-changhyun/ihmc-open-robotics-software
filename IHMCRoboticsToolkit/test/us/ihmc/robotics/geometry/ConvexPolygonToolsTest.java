@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ConvexPolygonToolsTest
 {
@@ -20,7 +20,7 @@ public class ConvexPolygonToolsTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCombineDisjointPolygons()
    {
@@ -205,7 +205,7 @@ public class ConvexPolygonToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test (timeout = 30000)
    public void testLimitVerticesConservative()
    {
@@ -261,7 +261,7 @@ public class ConvexPolygonToolsTest
          // check if the number of vertices is correct
          Assert.assertEquals(desiredNumberOfVertices, polygon.getNumberOfVertices());
          // check if the new polygon is contained in the old one
-         Assert.assertTrue(polygon.getConvexPolygon2d().isCompletelyInside(originalPolygon.getConvexPolygon2d(), 10E-10));
+         Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon.getConvexPolygon2d(), 10E-10, originalPolygon.getConvexPolygon2d()));
       }
 
 //      System.out.println("Tested " + increase + " point increases");

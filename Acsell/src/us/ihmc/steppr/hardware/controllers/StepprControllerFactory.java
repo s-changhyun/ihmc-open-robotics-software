@@ -7,19 +7,20 @@ import javax.xml.bind.JAXBException;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
+import us.ihmc.avatar.DRCEstimatorThread;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -27,7 +28,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.realtime.PriorityParameters;
-import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.steppr.hardware.output.StepprOutputWriter;
@@ -98,7 +99,7 @@ public class StepprControllerFactory
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
-               drcOutputWriter, new LegJointName[] { LegJointName.KNEE, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
+               drcOutputWriter, new LegJointName[] { LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
@@ -172,13 +173,14 @@ public class StepprControllerFactory
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            feetForceSensorNames, feetContactSensorNames, wristForceSensorNames ,
-            walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
+            feetContactSensorNames, wristForceSensorNames , walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();

@@ -1,32 +1,31 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-
-import javax.vecmath.Point3d;
-
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.EulerType;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
-
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+
+import javax.vecmath.Point3d;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+
+import static org.junit.Assert.*;
 
 public class MatrixToolsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaNDenseMatrix()
    {
@@ -42,7 +41,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZeroDenseMatrix()
    {
@@ -58,7 +57,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixColumnFromArrayDenseMatrix()
    {
@@ -73,7 +72,7 @@ public class MatrixToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixFromOneBasedArrayDenseMatrix()
    {
@@ -88,7 +87,7 @@ public class MatrixToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDenseMatrixIntIntDenseMatrix()
    {
@@ -104,7 +103,7 @@ public class MatrixToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDoubleArrayDenseMatrix()
    {
@@ -120,12 +119,12 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void tranformSe3IntoTransform3D()
    {
       Se3_F64 a = new Se3_F64();
-      RotationMatrixGenerator.eulerXYZ(0.1, -0.5, 1.2, a.getR());
+      ConvertRotation3D_F64.eulerToMatrix(EulerType.XYZ, 0.1, -0.5, 1.2, a.getR());
       a.getT().set(3.3, 1.2, -9);
 
       RigidBodyTransform b = new RigidBodyTransform();
@@ -143,7 +142,7 @@ public class MatrixToolsTest
       assertEquals(p0.z, p1.getZ(), 1e-8);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemoveRow()
    {
@@ -175,7 +174,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRemoveZeroRows()
    {
@@ -219,7 +218,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testScaleTranspose() throws Exception
    {
@@ -243,7 +242,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInsertFrameTupleIntoEJMLVector()
    {
@@ -262,7 +261,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtractFrameTupleFromEJMLVector()
    {
@@ -282,7 +281,7 @@ public class MatrixToolsTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCheckDenseMatrixDimensions()
    {

@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
+import us.ihmc.simulationconstructionset.Link;
 
 /**
  * Factory for creating collision shapes
- *
- * @author Peter Abeles
  */
 public interface CollisionShapeFactory
 {
@@ -20,7 +19,7 @@ public interface CollisionShapeFactory
     *
     * @param margin Collision margin
     */
-   public void setMargin(double margin);
+   public abstract void setMargin(double margin);
 
    /**
     * Creates a box shape.  The box will be centered around the origin (0,0,0) with vertexes spaced at the specified distances from the origin.
@@ -30,17 +29,16 @@ public interface CollisionShapeFactory
     * @param radiusZ Radius of box along z-axis
     * @return Description of the shape.
     */
-   public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ);
+   public abstract CollisionShapeDescription<?> createBox(double radiusX, double radiusY, double radiusZ);
 
-   // not fully supported yet
-   public CollisionShapeDescription createCylinder(double radius, double height);
+   public abstract CollisionShapeDescription<?> createCylinder(double radius, double height);
 
-   // not fully supported yet
-   public CollisionShapeDescription createSphere(double radius);
+   public abstract CollisionShapeDescription<?> createSphere(double radius);
 
+   public abstract CollisionShapeDescription<?> createCapsule(double radius, double objectHeight);
 
    /**
-    * Creates a box shape.
+    * Adds a shape.
     *
     * Also  which shapes a shape can collide against.  By default a shape will collide with all other shapes.
     * A shape will collide with another shape if (shapeGroup & collisionMask) != 0.
@@ -52,10 +50,9 @@ public interface CollisionShapeFactory
     * @param collisionMask Bit field specifying which groups it can collide against.  Set to 0xFFFFFFFF to collide against all groups
     * @return The resulting collision shape.  Already attached to the provided link.
     */
-   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask);
+   public abstract CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask);
 
-   /**
-    * Adds a 3-DOF force sensor at the specified location
-    */
-   public ScsForceSensor addForceSensor(String name, CollisionShape shape, RigidBodyTransform sensorToShape);
-}
+   public abstract CollisionShape addShape(CollisionShapeDescription<?> description);
+
+   public abstract void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription);
+ }

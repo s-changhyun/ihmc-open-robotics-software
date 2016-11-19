@@ -12,13 +12,14 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedMultiRobotTestInterface
 {
@@ -31,7 +32,7 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
       try
       {
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -53,13 +54,13 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 800000)
    public void rotate360InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(-0.2);
+      variables.getYoPlanarVelocityInputZ().set(-0.1);
       
       int numSpins = 1;
       for (int i = 0; i < numSpins; i++)
@@ -80,13 +81,13 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 800000)
    public void rotate360InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(0.2);
+      variables.getYoPlanarVelocityInputZ().set(0.1);
       
       int numSpins = 1;
       for (int i = 0; i < numSpins; i++)

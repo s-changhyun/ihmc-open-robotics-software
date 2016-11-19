@@ -5,10 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
@@ -289,7 +289,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          makeLegJointHelper(robotSide, false, LegJointName.HIP_YAW);
          makeLegJointHelper(robotSide, true, LegJointName.HIP_PITCH);
          makeLegJointHelper(robotSide, false, LegJointName.HIP_ROLL);
-         makeLegJointHelper(robotSide, true, LegJointName.KNEE);
+         makeLegJointHelper(robotSide, true, LegJointName.KNEE_PITCH);
          makeLegJointHelper(robotSide, true, LegJointName.ANKLE_PITCH);
          makeLegJointHelper(robotSide, false, LegJointName.ANKLE_ROLL);
       }
@@ -347,8 +347,8 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setProportionalGain(165);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setDerivativeGain(6.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setProportionalGain(80.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setDerivativeGain(3.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setProportionalGain(80.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setDerivativeGain(3.0);
 
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setProportionalGain(20.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setDerivativeGain(2.0);

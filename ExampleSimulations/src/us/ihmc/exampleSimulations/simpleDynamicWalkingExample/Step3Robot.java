@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -205,56 +205,56 @@ public class Step3Robot extends Robot
    // ************************* Part 1 --> control height of the robot
    public double getBodyPositionZ()
    {
-      return bodyJoint1.q.getDoubleValue();
+      return bodyJoint1.getQ();
    }
 
    public double getBodyVelocityZ()
    {
-      return bodyJoint1.qd.getDoubleValue();
+      return bodyJoint1.getQD();
    }
 
    public void setKneeForce(RobotSide robotSide, double desiredTauKnee)
    {
-      kneeJoints.get(robotSide).tau.set(desiredTauKnee);
+      kneeJoints.get(robotSide).setTau(desiredTauKnee);
    }
 
    // ************************* Part 2 --> control body pitch
    public double getBodyPitch()
    {
-      return bodyJoint2.q.getDoubleValue();
+      return bodyJoint2.getQ();
    }
 
    public double getBodyPitchVel()
    {
-      return bodyJoint2.qd.getDoubleValue();
+      return bodyJoint2.getQD();
    }
 
    public void setHipTau(RobotSide robotSide, double desiredTauBody)
    {
-      hipJoints.get(robotSide).tau.set(desiredTauBody);
+      hipJoints.get(robotSide).setTau(desiredTauBody);
    }
 
    //************************** Part 3 --> control right leg pitch
    public double getLegPitch(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).q.getDoubleValue();
+      return hipJoints.get(robotSide).getQ();
    }
 
    public double getLegPitchVel(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).qd.getDoubleValue();
+      return hipJoints.get(robotSide).getQD();
    }
 
  
    //*************************************
    public double getKneePositionZ(RobotSide robotSide)
    {
-      return kneeJoints.get(robotSide).q.getDoubleValue();
+      return kneeJoints.get(robotSide).getQ();
    }
 
    public double getKneeVelocityZ(RobotSide robotSide)
    {
-      return kneeJoints.get(robotSide).qd.getDoubleValue();
+      return kneeJoints.get(robotSide).getQD();
    }
 
    //*******************************************

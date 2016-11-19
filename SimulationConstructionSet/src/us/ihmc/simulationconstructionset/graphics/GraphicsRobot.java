@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import us.ihmc.robotics.kinematics.CommonJoint;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
+import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.robotics.kinematics.CommonJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class GraphicsRobot implements GraphicsUpdatable
 {
@@ -36,16 +38,16 @@ public class GraphicsRobot implements GraphicsUpdatable
          rootNode.addChild(rootGraphicsJoint);
          addJoints(joint.getChildrenJoints(), rootGraphicsJoint);
       }
-      
+
       update();
    }
-   
-   
+
+
    public GraphicsRobot(String name, RigidBody rootBody, GraphicsObjectsHolder graphicsObjectsHolder)
    {
       this(name, rootBody, graphicsObjectsHolder, false);
    }
-   
+
    public GraphicsRobot(String name, RigidBody rootBody, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {
       rootNode = new Graphics3DNode(name, Graphics3DNodeType.TRANSFORM);
@@ -59,10 +61,10 @@ public class GraphicsRobot implements GraphicsUpdatable
          rootNode.addChild(rootGraphicsJoint);
          addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), rootGraphicsJoint, graphicsObjectsHolder, useCollisionMeshes);
       }
-      
+
       update();
    }
-   
+
 
    public void update()
    {
@@ -76,7 +78,7 @@ public class GraphicsRobot implements GraphicsUpdatable
    {
       return rootNode;
    }
-   
+
    public Graphics3DNode getCameraNode()
    {
       return cameraNode;
@@ -94,33 +96,39 @@ public class GraphicsRobot implements GraphicsUpdatable
 
    private GraphicsJoint createJoint(Joint joint, Graphics3DNodeType nodeType)
    {
-      
       GraphicsJoint graphicsJoint = new GraphicsJoint(joint.getName(), joint, joint.getLink().getLinkGraphics(), nodeType);
       allJoints.put(joint, graphicsJoint);
       graphicsJoints.add(graphicsJoint);
       return graphicsJoint;
    }
-   
+
    private GraphicsJoint createJoint(InverseDynamicsJoint inverseDynamicsJoint, Graphics3DNodeType nodeType, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {
       Graphics3DObject graphics3DObject;
       if(useCollisionMeshes)
       {
-         graphics3DObject = graphicsObjectsHolder.getCollisionObject(inverseDynamicsJoint.getName());
+         graphics3DObject = generateGraphics3DObjectFromCollisionMesh(graphicsObjectsHolder.getCollisionObject(inverseDynamicsJoint.getName()));
       }
       else
       {
          graphics3DObject = graphicsObjectsHolder.getGraphicsObject(inverseDynamicsJoint.getName());
       }
-      
+
       GraphicsJoint graphicsJoint = new GraphicsJoint(inverseDynamicsJoint.getName(), inverseDynamicsJoint, graphics3DObject, nodeType);
-            
-      
+
+
       allJoints.put(inverseDynamicsJoint, graphicsJoint);
       graphicsJoints.add(graphicsJoint);
       return graphicsJoint;
    }
-   
+
+   private Graphics3DObject generateGraphics3DObjectFromCollisionMesh(CollisionMeshDescription collisionObject)
+   {
+      System.err.println("Need to implement " + getClass().getSimpleName() + ".generateGraphics3DObjectFromCollisionMesh()!");
+      return null;
+   }
+
+
    private void addInverseDynamicsJoints(List<InverseDynamicsJoint> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {
       for(InverseDynamicsJoint joint : joints)
@@ -130,7 +138,7 @@ public class GraphicsRobot implements GraphicsUpdatable
          addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), graphicsJoint, graphicsObjectsHolder, useCollisionMeshes);
       }
    }
-   
+
 
    public GraphicsJoint getGraphicsJoint(CommonJoint joint)
    {

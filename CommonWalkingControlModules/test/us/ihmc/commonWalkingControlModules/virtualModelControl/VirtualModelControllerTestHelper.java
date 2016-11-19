@@ -2,19 +2,20 @@ package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.PIDController;
@@ -29,6 +30,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
@@ -39,11 +41,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
@@ -241,8 +239,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_hpz = ScrewTools.addRevoluteJoint("l_leg_hpz", pelvisBody, leftHipYawOffset, Z);
       RevoluteJoint r_leg_hpz = ScrewTools.addRevoluteJoint("r_leg_hpz", pelvisBody, rightHipYawOffset, Z);
-      l_leg_hpz.setQ(l_hip_yaw.getQ().getDoubleValue());
-      r_leg_hpz.setQ(r_hip_yaw.getQ().getDoubleValue());
+      l_leg_hpz.setQ(l_hip_yaw.getQYoVariable().getDoubleValue());
+      r_leg_hpz.setQ(r_hip_yaw.getQYoVariable().getDoubleValue());
       RigidBody leftHipDifferentialBody = copyLinkAsRigidBody(l_hip_differential, l_leg_hpz, "l_hip_differential");
       RigidBody rightHipDifferentialBody = copyLinkAsRigidBody(r_hip_differential, r_leg_hpz, "r_hip_differential");
       jointMap.put(l_leg_hpz, l_hip_yaw);
@@ -264,8 +262,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_hpx = ScrewTools.addRevoluteJoint("l_leg_hpx", leftHipDifferentialBody, leftHipRollOffset, X);
       RevoluteJoint r_leg_hpx = ScrewTools.addRevoluteJoint("r_leg_hpx", rightHipDifferentialBody, rightHipRollOffset, X);
-      l_leg_hpx.setQ(l_hip_roll.getQ().getDoubleValue());
-      r_leg_hpx.setQ(r_hip_roll.getQ().getDoubleValue());
+      l_leg_hpx.setQ(l_hip_roll.getQYoVariable().getDoubleValue());
+      r_leg_hpx.setQ(r_hip_roll.getQYoVariable().getDoubleValue());
       RigidBody leftHipDifferentialBody2 = copyLinkAsRigidBody(l_hip_differential2, l_leg_hpx, "l_hip_differential");
       RigidBody rightHipDifferentialBody2 = copyLinkAsRigidBody(r_hip_differential2, r_leg_hpx, "r_hip_differential");
       jointMap.put(l_leg_hpx, l_hip_roll);
@@ -287,8 +285,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_hpy = ScrewTools.addRevoluteJoint("l_leg_hpy", leftHipDifferentialBody2, leftHipPitchOffset, Y);
       RevoluteJoint r_leg_hpy = ScrewTools.addRevoluteJoint("r_leg_hpy", rightHipDifferentialBody2, rightHipPitchOffset, Y);
-      l_leg_hpy.setQ(l_hip_pitch.getQ().getDoubleValue());
-      r_leg_hpy.setQ(r_hip_pitch.getQ().getDoubleValue());
+      l_leg_hpy.setQ(l_hip_pitch.getQYoVariable().getDoubleValue());
+      r_leg_hpy.setQ(r_hip_pitch.getQYoVariable().getDoubleValue());
       RigidBody leftThighBody = copyLinkAsRigidBody(leftThigh, l_leg_hpy, "l_thigh");
       RigidBody rightThighBody = copyLinkAsRigidBody(rightThigh, r_leg_hpy, "r_thigh");
       jointMap.put(l_leg_hpy, l_hip_pitch);
@@ -310,8 +308,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_kny = ScrewTools.addRevoluteJoint("l_leg_kny", leftThighBody, leftKneePitchOffset, Y);
       RevoluteJoint r_leg_kny = ScrewTools.addRevoluteJoint("r_leg_kny", rightThighBody, rightKneePitchOffset, Y);
-      l_leg_kny.setQ(l_knee_pitch.getQ().getDoubleValue());
-      r_leg_kny.setQ(r_knee_pitch.getQ().getDoubleValue());
+      l_leg_kny.setQ(l_knee_pitch.getQYoVariable().getDoubleValue());
+      r_leg_kny.setQ(r_knee_pitch.getQYoVariable().getDoubleValue());
       RigidBody leftShinBody = copyLinkAsRigidBody(l_shin, l_leg_kny, "l_shin");
       RigidBody rightShinBody = copyLinkAsRigidBody(r_shin, r_leg_kny, "r_shin");
       jointMap.put(l_leg_kny, l_knee_pitch);
@@ -333,8 +331,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_aky = ScrewTools.addRevoluteJoint("l_leg_aky", leftShinBody, leftAnklePitchOffset, Y);
       RevoluteJoint r_leg_aky = ScrewTools.addRevoluteJoint("r_leg_aky", rightShinBody, rightAnklePitchOffset, Y);
-      l_leg_aky.setQ(l_ankle_pitch.getQ().getDoubleValue());
-      r_leg_aky.setQ(r_ankle_pitch.getQ().getDoubleValue());
+      l_leg_aky.setQ(l_ankle_pitch.getQYoVariable().getDoubleValue());
+      r_leg_aky.setQ(r_ankle_pitch.getQYoVariable().getDoubleValue());
       RigidBody leftAnkleDifferentialBody = copyLinkAsRigidBody(l_ankle_differential, l_leg_aky, "l_ankle_differential");
       RigidBody rightAnkleDifferentialBody = copyLinkAsRigidBody(r_ankle_differential, r_leg_aky, "r_ankle_differential");
       jointMap.put(l_leg_aky, l_ankle_pitch);
@@ -356,8 +354,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_akx = ScrewTools.addRevoluteJoint("l_leg_akx", leftAnkleDifferentialBody, leftAnkleRollOffset, X);
       RevoluteJoint r_leg_akx = ScrewTools.addRevoluteJoint("r_leg_akx", rightAnkleDifferentialBody, rightAnkleRollOffset, X);
-      l_leg_akx.setQ(l_ankle_roll.getQ().getDoubleValue());
-      r_leg_akx.setQ(r_ankle_roll.getQ().getDoubleValue());
+      l_leg_akx.setQ(l_ankle_roll.getQYoVariable().getDoubleValue());
+      r_leg_akx.setQ(r_ankle_roll.getQYoVariable().getDoubleValue());
       RigidBody leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
       RigidBody rightFootBody = copyLinkAsRigidBody(r_foot, r_leg_akx, "r_foot");
       jointMap.put(l_leg_akx, l_ankle_roll);
@@ -846,6 +844,59 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1138,6 +1189,59 @@ public class VirtualModelControllerTestHelper
       @Override
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
       }
    }
 
@@ -1473,6 +1577,59 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1796,6 +1953,59 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -2002,14 +2212,65 @@ public class VirtualModelControllerTestHelper
       @Override
       public OneDoFJoint[] getControllableOneDoFJoints()
       {
-         
-         
          return null;
       }
 
       @Override
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
       }
    }
 

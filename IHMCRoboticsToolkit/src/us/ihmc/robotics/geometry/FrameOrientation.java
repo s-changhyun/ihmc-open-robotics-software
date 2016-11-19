@@ -109,8 +109,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 
    public void set(AxisAngle4d axisAngle4d)
    {
-      quaternion.set(axisAngle4d);
-      normalize();
+      quaternion.setOrientation(axisAngle4d);
    }
 
    public void set(Quat4d quaternion)
@@ -371,11 +370,18 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
       quaternion.negate();
    }
 
+   public void normalize()
+   {
+      if (containsNaN())
+         return;
+      quaternion.normalize();
+   }
+   
    /**
     * Normalize the quaternion and also limits the described angle magnitude in [-Pi, Pi].
     * The latter prevents some controllers to poop their pants.
     */
-   public void normalize()
+   public void normalizeAndLimitToPiMinusPi()
    {
       quaternion.normalizeAndLimitToPiMinusPi();
    }

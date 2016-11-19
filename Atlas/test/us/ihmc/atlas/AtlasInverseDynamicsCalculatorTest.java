@@ -2,18 +2,18 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCInverseDynamicsCalculatorTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCInverseDynamicsCalculatorTest;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AtlasInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalculatorTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {
@@ -21,7 +21,7 @@ public class AtlasInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalcul
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {

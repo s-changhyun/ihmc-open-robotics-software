@@ -12,13 +12,14 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -32,6 +33,7 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
       {
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.ROLLING_HILLS);
@@ -53,14 +55,14 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 200000)
    public void testWalkingOverBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
       variables.getYoPlanarVelocityInputX().set(0.05);
-      variables.getYoPlanarVelocityInputZ().set(0.15);
+      variables.getYoPlanarVelocityInputZ().set(0.05);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 35.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.4));

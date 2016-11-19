@@ -3,11 +3,12 @@ package us.ihmc.tools.maps;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CircularLongMapTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFillingMap()
    {
@@ -39,7 +40,7 @@ public class CircularLongMapTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMatchNearest()
    {
@@ -68,7 +69,7 @@ public class CircularLongMapTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEdgeCases()
    {

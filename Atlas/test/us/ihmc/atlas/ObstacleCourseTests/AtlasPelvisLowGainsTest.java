@@ -2,25 +2,25 @@ package us.ihmc.atlas.ObstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCInverseDynamicsCalculatorTestHelper;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCPelvisLowGainsTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCInverseDynamicsCalculatorTestHelper;
+import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
@@ -59,7 +59,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 
 
    @Override
-   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
+   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(FullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
    {
       return null;
 //      InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener = new FancyInverseDynamicsCalculatorListener(controllersFullRobotModel, robot);
@@ -71,23 +71,23 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       private final boolean visualize = true;
       private final double gravityZ = 9.81;
       private final DRCInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
-      private final SDFFullRobotModel controllersFullRobotModel;
+      private final FullRobotModel controllersFullRobotModel;
       private final SimulationConstructionSet scs;
-      private final SDFHumanoidRobot robot, simulatedRobot;
+      private final HumanoidFloatingRootJointRobot robot, simulatedRobot;
       private boolean firstTick = true;
 
-      public FancyInverseDynamicsCalculatorListener(SDFFullHumanoidRobotModel controllersFullRobotModel, SDFHumanoidRobot simulatedRobot)
+      public FancyInverseDynamicsCalculatorListener(FullHumanoidRobotModel controllersFullRobotModel, HumanoidFloatingRootJointRobot simulatedRobot)
       {
          this.controllersFullRobotModel = controllersFullRobotModel;
          this.simulatedRobot = simulatedRobot;
 
          boolean headless = false;
          AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, headless);
-//         SDFFullRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
+//         FullRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
 
          boolean createCollisionMeshes = false;
          atlasRobotModel.setEnableJointDamping(false);
-         robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+         robot = atlasRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
          robot.setGravity(gravityZ);
 
          atlasInverseDynamicsCalculatorTestHelper = new DRCInverseDynamicsCalculatorTestHelper(controllersFullRobotModel, robot, visualize, gravityZ);
@@ -101,7 +101,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       @Override
       public void inverseDynamicsCalculatorIsDone(InverseDynamicsCalculator inverseDynamicsCalculator)
       {
-         SDFFullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
+         FullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
          fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper.updateFrames();
 
          // Either of these two seem to work. Matching full robot model gives near exact results. Matching robot state gives really close results.

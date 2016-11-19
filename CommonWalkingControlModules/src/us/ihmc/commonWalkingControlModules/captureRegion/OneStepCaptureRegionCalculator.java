@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -13,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class OneStepCaptureRegionCalculator
 {
@@ -112,7 +112,7 @@ public class OneStepCaptureRegionCalculator
       {
          // change the support foot polygon only if the swing side changed to avoid garbage every tick.
          this.supportFootPolygon.setIncludingFrameAndUpdate(footPolygon);
-         this.supportFootPolygon.changeFrame(supportAnkleZUp);
+         this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportAnkleZUp);
          previousSwingSide = swingSide;
       }
       capturePoint.setIncludingFrame(icp);
@@ -129,7 +129,7 @@ public class OneStepCaptureRegionCalculator
       captureRegionPolygon.clear(supportAnkleZUp);
 
       // 2. Get extreme CoP positions
-      ArrayList<FramePoint2d> extremesOfFeasibleCOP = supportFootPolygon.getAllVisibleVerticesFromOutsideLeftToRight(capturePoint);
+      ArrayList<FramePoint2d> extremesOfFeasibleCOP = supportFootPolygon.getAllVisibleVerticesFromOutsideLeftToRightCopy(capturePoint);
       if (extremesOfFeasibleCOP == null)
       {
          // If the ICP is in the support polygon return the whole reachable region.

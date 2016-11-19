@@ -2,35 +2,32 @@ package us.ihmc.acsell;
 
 import org.junit.Test;
 
+import us.ihmc.avatar.DRCFlatGroundWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundWalkingTest
 {
    private BonoRobotModel robotModel;
 
-	@DeployableTestMethod(estimatedDuration = 15.4)
+	@ContinuousIntegrationTest(estimatedDuration = 15.4)
 	@Test(timeout = 77000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
-
-      String runName = "BONOFlatGroundWalkingTest";
       final boolean runningOnRealRobot = false;
-      
+
       //create a subclass of standard DRCRobot model but overrides FootSwitchType for both WalkingControl/StateEstimation parameters.
       robotModel = new BonoRobotModel(runningOnRealRobot, false)
       {
@@ -62,8 +59,7 @@ public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundW
          }
       };
 
-      boolean doPelvisYawWarmup = false;
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+      super.testFlatGroundWalking(robotModel, false);
    }
 
    @Override

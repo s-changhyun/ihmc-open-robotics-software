@@ -12,15 +12,15 @@ import javax.vecmath.Point3d;
 
 import com.esotericsoftware.kryo.Kryo;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -48,7 +48,7 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.REAL_ROBOT, true);
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), fullRobotModel.getForceSensorDefinitions(), null, fullRobotModel.getIMUDefinitions());
       PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
 

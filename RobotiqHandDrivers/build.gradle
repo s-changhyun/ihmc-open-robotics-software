@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.17"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
   }
 }
 
@@ -31,7 +31,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
@@ -46,13 +46,13 @@ dependencies {
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
 
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
-	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+	compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
-	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }

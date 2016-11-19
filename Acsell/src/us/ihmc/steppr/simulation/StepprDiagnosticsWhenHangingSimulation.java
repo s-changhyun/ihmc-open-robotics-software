@@ -8,14 +8,14 @@ import javax.swing.JButton;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.avatar.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
-import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -41,7 +41,7 @@ public class StepprDiagnosticsWhenHangingSimulation
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
@@ -182,9 +182,9 @@ public class StepprDiagnosticsWhenHangingSimulation
       }
       
       @Override
-      public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
       {
-         SDFHumanoidRobot robot = super.createSdfRobot(createCollisionMeshes);
+         HumanoidFloatingRootJointRobot robot = super.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
          
          Joint joint = robot.getJoint("back_ubz");
          if (joint == null) throw new RuntimeException();

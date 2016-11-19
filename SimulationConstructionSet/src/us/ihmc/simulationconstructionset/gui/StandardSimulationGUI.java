@@ -48,7 +48,6 @@ import javax.vecmath.Color3f;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.CameraConfigurationList;
 import us.ihmc.graphics3DAdapter.camera.CameraMountList;
@@ -59,11 +58,15 @@ import us.ihmc.graphics3DAdapter.camera.OffscreenBufferVideoServer;
 import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
 import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.input.SelectedListener;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -114,11 +117,9 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
@@ -311,6 +312,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          for (Robot robot : robots)
          {
+            //TODO: Should use the graphics robots, not the robots for cameras...
             robot.getCameraMountList(cameraMountList);
          }
       }
@@ -465,6 +467,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void setup(final HeightMap heightMap)
    {
+      createGraphicsRobots();
+
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
          @Override
@@ -657,18 +661,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       // contentPane.add(splitPane);
       // 3D Canvass Stuff goes here...
 
-      if (robots != null)
-      {
-         for (Robot robot : robots)
-         {
-            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
-            graphicsUpdatables.add(graphicsRobot);
-            graphicsRobots.put(robot, graphicsRobot);
-            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
-
-         }
-      }
-
       // GUI Actions:
       if (robots != null)
       {
@@ -822,6 +814,20 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, yoVariableExplorerTabbedPane,
                bookmarkedVariablesHolder);
          yoVariableExplorerTabbedPane.setVarPanelJPopupMenu(varPanelJPopupMenu);
+      }
+   }
+
+   private void createGraphicsRobots()
+   {
+      if (robots != null)
+      {
+         for (Robot robot : robots)
+         {
+            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
+            graphicsUpdatables.add(graphicsRobot);
+            graphicsRobots.put(robot, graphicsRobot);
+            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
+         }
       }
    }
 
@@ -3131,6 +3137,11 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          }
 
       }
+   }
+   
+   public Object getGraphicsConch()
+   {
+      return graphics3dAdapter.getGraphicsConch();
    }
 
    public void removeStaticGraphics3dNode(Graphics3DNode nodeToRemove)

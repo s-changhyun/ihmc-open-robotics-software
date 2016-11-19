@@ -6,12 +6,12 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -45,13 +45,13 @@ public class FootstepListBehavior extends AbstractBehavior
    private double defaultSwingTime;
    private double defaultTranferTime;
 
-   public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
+   public FootstepListBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
-      attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>();
-      attachControllerListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
+      attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       numberOfFootsteps.set(-1);
       defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();
@@ -103,7 +103,7 @@ public class FootstepListBehavior extends AbstractBehavior
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingFootstepDataList.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingFootstepDataList);
+         sendPacket(outgoingFootstepDataList);
 
          outgoingFootstepDataList.setDestination(PacketDestination.CONTROLLER);
          sendPacketToController(outgoingFootstepDataList);
@@ -197,7 +197,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       isPaused.set(true);
@@ -236,22 +236,7 @@ public class FootstepListBehavior extends AbstractBehavior
       return ret;
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
+  
    public boolean hasInputBeenSet()
    {
       if (numberOfFootsteps.getIntegerValue() != -1 && hasRobotStartedWalking.getBooleanValue())

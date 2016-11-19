@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -44,6 +44,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -58,13 +59,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.DoneWithFinishableStateTransitionCondition;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
@@ -397,7 +396,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       /*
       for (RobotSide robotSide : RobotSide.values)
       {
-         privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE), PrivilegedConfigurationOption.AT_MID_RANGE);
+         privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
 
          RigidBody pelvis = fullRobotModel.getPelvis();
          RigidBody foot = fullRobotModel.getFoot(robotSide);
@@ -434,7 +433,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          manipulationControlModule.holdCurrentArmConfiguration();
       }
-      chestOrientationManager.holdCurrentOrientation();
+
+      chestOrientationManager.goToHomeFromCurrent(1.0);
 
       balanceManager.initialize();
       feetManager.initialize();

@@ -24,9 +24,9 @@ import us.ihmc.tools.time.DateTools;
 public class BambooTools
 {
    private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[] { "C:/BambooDataAndVideos/", "D:/BambooDataAndVideos/",
-         "../BambooDataAndVideos/", "~/BambooVideos" };
+         "../BambooDataAndVideos/", "~/bamboo-videos" };
 
-   private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/BambooVideos";
+   private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/bamboo-videos";
    private final static String eraseableBambooDataAndVideosDirectoryWindows = "X:/EraseableBambooDataAndVideos/";
 
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
@@ -35,11 +35,16 @@ public class BambooTools
 
    public static boolean isRunningOnBamboo()
    {
-      String buildType = System.getProperty("build.type");
-      if (buildType != null)
+      String isBamboo = System.getenv("IS_BAMBOO");
+      
+      if (isBamboo == null || !isBamboo.equals("true"))
+      {
+         return false;
+      }
+      else
+      {
          return true;
-
-      return false;
+      }
    }
 
    public static boolean isNightlyBuild()
@@ -407,19 +412,13 @@ public class BambooTools
    private static GUIMessageFrame guiMessageFrame;
    private static int junitTestCasesIndex;
 
-   public static void logMessagesToFile(String filename)
-   {
-      if (guiMessageFrame == null)
-         return;
-
-      File file = new File(filename);
-      logMessagesToFile(file);
-   }
-
    public static void logMessagesToFile(File file)
    {
       if (guiMessageFrame == null)
+      {
+         PrintTools.error("GUI message frame null. Returning");
          return;
+      }
 
       guiMessageFrame.save(file);
    }

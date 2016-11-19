@@ -1,49 +1,44 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
+import java.util.Random;
+
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 
 public class RowOfDominosRobot extends Robot
 {
-   private final ScsCollisionDetector collisionDetector;
-
    public RowOfDominosRobot()
    {
       super("RowOfDominosRobot");
-      
-      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry()); 
+
+      Random random = new Random(1999L);
+
+      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry());
       final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
-      
-      int numberOfDominos = 10;
 
-      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
-      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(0.002);
+      int numberOfDominos = 30;
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
       double dominoHeight = 0.048;
-      
+
       double dominoMass = 0.2;
       RigidBodyTransform nextDominoTransform = new RigidBodyTransform();
-      nextDominoTransform.setTranslation(new Vector3d(0.0, 0.0, dominoHeight/2.0 + 0.006));
-      
+      nextDominoTransform.setTranslation(new Vector3d(0.0, 0.0, dominoHeight/2.0 + 0.001));
+
       Vector3d dominoTranslation = new Vector3d(dominoHeight * 0.6, 0.0, 0.0);
       RigidBodyTransform tempTransform = new RigidBodyTransform();
       RigidBodyTransform tempTransform2 = new RigidBodyTransform();
@@ -59,59 +54,32 @@ public class RowOfDominosRobot extends Robot
 
          Graphics3DObject linkGraphics = new Graphics3DObject();
          linkGraphics.translate(0.0, 0.0, -dominoHeight/2.0);
-         linkGraphics.addCube(dominoDepth, dominoWidth, dominoHeight, YoAppearance.Red());
+         AppearanceDefinition randomColor = YoAppearance.randomColor(random);
+         linkGraphics.addCube(dominoDepth, dominoWidth, dominoHeight, randomColor);
          link.setLinkGraphics(linkGraphics);
 
-         CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(dominoDepth/2.0, dominoWidth/2.0, dominoHeight/2.0);
-         RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-         shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-         collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
-         link.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
+         CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+         collisionMeshDescription.addCubeReferencedAtCenter(dominoDepth, dominoWidth, dominoHeight);
+         link.setCollisionMesh(collisionMeshDescription);
 
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);
 
-         
          floatingJoint.setRotationAndTranslation(nextDominoTransform);
-         
+
          tempTransform.setIdentity();
          tempTransform.setRotationYawAndZeroTranslation(0.15);
          tempTransform.setTranslation(dominoTranslation);
-         
+
          tempTransform2.setIdentity();
          tempTransform2.multiply(tempTransform, nextDominoTransform);
          nextDominoTransform.set(tempTransform2);
-         
+
          if (i==0)
          {
             floatingJoint.setAngularVelocityInBody(new Vector3d(0.0, 10.0, 0.0));
-         }         
+         }
       }
-
-
-      NullJoint baseJoint = new NullJoint("base", new Vector3d(), this);
-
-//    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
-      Link baseLink = new Link("base");
-      baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
-      Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -0.01);
-      baseLinkGraphics.addCube(100.0, 100.0, 0.01, YoAppearance.Green());
-      baseLink.setLinkGraphics(baseLinkGraphics);
-      baseLink.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
-
-      CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(100.0, 100.0, 0.01/2.0);
-
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(-0.005, 0.0, 0.0));
-      collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
-
-//    baseJoint.setVelocity(0.0, 0.0, 1.0);
-
-      baseJoint.setLink(baseLink);
-      this.addRootJoint(baseJoint);
-
-      this.addStaticLink(baseLink);
 
       FunctionToIntegrate functionToIntegrate = new FunctionToIntegrate()
       {
@@ -143,11 +111,6 @@ public class RowOfDominosRobot extends Robot
       };
 
       this.addFunctionToIntegrate(functionToIntegrate);
-   }
-
-   public ScsCollisionDetector getCollisionDetector()
-   {
-      return collisionDetector;
    }
 
 }

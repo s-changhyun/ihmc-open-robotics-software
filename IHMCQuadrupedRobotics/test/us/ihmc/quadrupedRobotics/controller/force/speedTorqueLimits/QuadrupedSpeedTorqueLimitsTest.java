@@ -14,13 +14,15 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRobotTestInterface
 {
@@ -34,10 +36,12 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
       try
       {
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseStateEstimator(false);
+         quadrupedTestFactory.setParameterSet(QuadrupedParameterSet.SIMULATION_IDEAL);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       }
@@ -56,7 +60,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 30000)
    public void testStandingLowerLimit()
    {
@@ -67,7 +71,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 90.0)
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 300000)
    public void testStandingOnThreeLegsLowerLimit()
    {
@@ -87,7 +91,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 35.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 30000)
    public void testXGaitWalkingInPlaceLowerLimit()
    {
@@ -104,7 +108,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 35.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 30000)
    public void testXGaitTrottingInPlaceLowerLimit()
    {
@@ -123,7 +127,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 35.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 30000)
    public void testXGaitWalkingLowerLimit()
    {
@@ -144,7 +148,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
    private double standupPrecisely() throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       double originalHeight = variables.getYoComPositionInputZ().getDoubleValue();
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

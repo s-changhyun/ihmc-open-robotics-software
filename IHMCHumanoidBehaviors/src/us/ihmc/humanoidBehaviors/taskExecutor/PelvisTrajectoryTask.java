@@ -1,22 +1,23 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class PelvisTrajectoryTask extends BehaviorTask
+public class PelvisTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
 {
    private final PelvisTrajectoryMessage pelvisTrajectoryMessage;
    private final PelvisTrajectoryBehavior pelvisTrajectoryBehavior;
 
-   public PelvisTrajectoryTask(PelvisTrajectoryMessage pelvisTrajectoryMessage, DoubleYoVariable yoTime, PelvisTrajectoryBehavior pelvisTrajectoryBehavior)
+   public PelvisTrajectoryTask(PelvisTrajectoryMessage pelvisTrajectoryMessage,  PelvisTrajectoryBehavior pelvisTrajectoryBehavior)
    {
-      this(pelvisTrajectoryMessage, yoTime, pelvisTrajectoryBehavior, 0.0);
+      this(null, pelvisTrajectoryMessage, pelvisTrajectoryBehavior);
    }
 
-   public PelvisTrajectoryTask(PelvisTrajectoryMessage pelvisTrajectoryMessage, DoubleYoVariable yoTime, PelvisTrajectoryBehavior pelvisTrajectoryBehavior, double sleepTime)
-   {
-      super(pelvisTrajectoryBehavior, yoTime, sleepTime);
+   
+   public PelvisTrajectoryTask(E stateEnum,PelvisTrajectoryMessage pelvisTrajectoryMessage,  PelvisTrajectoryBehavior pelvisTrajectoryBehavior)
+   {  
+      super(stateEnum, pelvisTrajectoryBehavior);
       this.pelvisTrajectoryBehavior = pelvisTrajectoryBehavior;
       this.pelvisTrajectoryMessage = pelvisTrajectoryMessage;
    }

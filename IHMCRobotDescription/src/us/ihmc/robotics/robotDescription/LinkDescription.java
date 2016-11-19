@@ -8,8 +8,8 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.InertiaTools;
 
 public class LinkDescription
@@ -20,10 +20,11 @@ public class LinkDescription
    private final Vector3d centerOfMassOffset = new Vector3d();
    private final DenseMatrix64F momentOfInertia = new DenseMatrix64F(3, 3);
 
-   public Vector3d principalMomentsOfInertia = new Vector3d();
-   public Matrix3d principalAxesRotation = new Matrix3d();
+   private final Vector3d principalMomentsOfInertia = new Vector3d();
+   private final Matrix3d principalAxesRotation = new Matrix3d();
 
    private LinkGraphicsDescription linkGraphics;
+   private CollisionMeshDescription collisionMesh;
 
    public LinkDescription(String name)
    {
@@ -43,6 +44,16 @@ public class LinkDescription
    public void setLinkGraphics(LinkGraphicsDescription linkGraphics)
    {
       this.linkGraphics = linkGraphics;
+   }
+
+   public CollisionMeshDescription getCollisionMesh()
+   {
+      return collisionMesh;
+   }
+
+   public void setCollisionMesh(CollisionMeshDescription collisionMesh)
+   {
+      this.collisionMesh = collisionMesh;
    }
 
    public double getMass()
@@ -106,6 +117,17 @@ public class LinkDescription
       }
 
       return momentOfInertia;
+   }
+
+   public void setMassAndRadiiOfGyration(double mass, double radiusOfGyrationX, double radiusOfGyrationY, double radiusOfGyrationZ)
+   {
+      this.mass = mass;
+
+      double Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationZ);
+      double Iyy = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ);
+      double Izz = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY);
+
+      setMomentOfInertia(Ixx, Iyy, Izz);
    }
 
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)

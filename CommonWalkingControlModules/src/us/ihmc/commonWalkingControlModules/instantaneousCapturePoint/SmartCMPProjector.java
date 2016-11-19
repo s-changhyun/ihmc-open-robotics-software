@@ -1,8 +1,12 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.DarkRed;
+import static us.ihmc.graphics3DDescription.appearance.YoAppearance.Blue;
+import static us.ihmc.graphics3DDescription.appearance.YoAppearance.DarkRed;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -14,10 +18,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class SmartCMPProjector extends CMPProjector
 {
@@ -137,8 +137,7 @@ public class SmartCMPProjector extends CMPProjector
 
       // if the support area is small set the desired CMP to centroid
       projectionArea.getBoundingBox(tempBoundingBox);
-      double diagonalLength = Math.sqrt(tempBoundingBox.getDiagonalLengthSquared());
-      if (diagonalLength < 0.01)
+      if (tempBoundingBox.getDiagonalLengthSquared() < 0.01 * 0.01)
       {
          projectionArea.getCentroid(projectedCMP);
          activeProjection.set(ProjectionMethod.SMALL_AREA_CENTROID);
@@ -164,9 +163,15 @@ public class SmartCMPProjector extends CMPProjector
          icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
          icpToCandidateVector.sub(candidate, capturePoint);
 
+         // make sure the CMP does not get projected too far from its original position
+         double maxICPSpeedIncreaseFactor = 3.0;
+         double desiredDistance = icpToCMPVector.length();
+         double distanceAfterProjecting = icpToCandidateVector.length();
+         boolean projectionClose = distanceAfterProjecting < maxICPSpeedIncreaseFactor * desiredDistance;
+
          // make sure the ICP is pushed in the right direction
          double angle = icpToCMPVector.angle(icpToCandidateVector);
-         if (angle < 1.0e-7)
+         if (angle < 1.0e-7 && projectionClose)
          {
             projectedCMP.setIncludingFrame(candidate);
             activeProjection.set(ProjectionMethod.RAY_THROUGH_AREA);
@@ -214,7 +219,7 @@ public class SmartCMPProjector extends CMPProjector
             if (newAngle < angle)
             {
                angle = newAngle;
-               projectedCMP.set(vertex);
+               projectedCMP.setIncludingFrame(vertex);
             }
          }
          // only do this if it actually helps (pushed the ICP in the right direction)

@@ -2,16 +2,16 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.DRCBumpyAndShallowRampsWalkingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCBumpyAndShallowRampsWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRampsWalkingTest
 {
    @Override
@@ -26,7 +26,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
    
-   @DeployableTestMethod(estimatedDuration = 95.7)
+   @ContinuousIntegrationTest(estimatedDuration = 95.7)
    @Test(timeout = 480000)
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -35,7 +35,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    }
    
    // This has never worked. Would be nice if we can get it to work.")
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout=300000)
    @Override
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -43,7 +43,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       super.testDRCOverRandomBlocks();
    }
    
-   @DeployableTestMethod(estimatedDuration = 71.3)
+   @ContinuousIntegrationTest(estimatedDuration = 71.3)
    @Test(timeout = 360000)
    @Override
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException

@@ -29,11 +29,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
@@ -76,7 +76,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 6.6)
+   @ContinuousIntegrationTest(estimatedDuration = 6.6)
    @Test(timeout = 33000)
    public void testRandomTranslationErrorInterpolation()
    {
@@ -86,7 +86,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, false);
-      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
       
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -153,7 +152,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @DeployableTestMethod(estimatedDuration = 10.0, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 600000)
    public void testRandomRotationErrorInterpolation()
    {
@@ -163,7 +162,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, true);
-      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
       
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -241,7 +239,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
    
    // TODO
-   @DeployableTestMethod(estimatedDuration = 10.0, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 600000)
    public void testTranslationAndRotationErrorsInterpolation()
    {
@@ -251,7 +249,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, true);
-      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
       
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -318,7 +315,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testMaxTranslationalCorrectionSpeedClip()
    {
@@ -402,7 +399,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @DeployableTestMethod(estimatedDuration = 0.3, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 60000)
    public void testMaxRotationalCorrectionSpeedClip()
    {
@@ -411,7 +408,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, true);
-      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -487,7 +483,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    // TODO
-   @DeployableTestMethod(estimatedDuration = 0.3, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testMaxCorrectionSpeedClipWorksWhenTranslationAndRotationOffsetsAreBig()
    {
@@ -496,7 +492,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, true);
-      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
       
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -636,7 +631,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 6.7)
+   @ContinuousIntegrationTest(estimatedDuration = 6.7)
    @Test(timeout = 33000)
    public void testRotationCorrectionIsActuallyDeactivatedWhenAskedTo()
    {
@@ -712,7 +707,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testErrorRotationCheckIsBehavingProperly()
    {

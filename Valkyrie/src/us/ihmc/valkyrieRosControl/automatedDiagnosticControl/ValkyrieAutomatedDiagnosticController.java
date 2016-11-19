@@ -1,15 +1,16 @@
 package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticConfiguration;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -17,7 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -33,7 +34,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
@@ -139,7 +139,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create sensor reader
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, true);
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
@@ -150,7 +150,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider,
             diagnosticSensorProcessingConfiguration, jointHandles, emptyPositionJointHandles, emptyJointStateHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
 
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));

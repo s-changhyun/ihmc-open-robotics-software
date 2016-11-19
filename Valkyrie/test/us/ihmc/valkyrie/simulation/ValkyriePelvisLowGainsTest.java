@@ -1,19 +1,19 @@
 package us.ihmc.valkyrie.simulation;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCPelvisLowGainsTest;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.tools.testing.TestPlanTarget;
 
 
-@DeployableTestClass(targets = {TestPlanTarget.Exclude})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -31,7 +31,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
@@ -52,7 +52,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    }
 
    @Override
-   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
+   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(FullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
    {
       return null;
    }

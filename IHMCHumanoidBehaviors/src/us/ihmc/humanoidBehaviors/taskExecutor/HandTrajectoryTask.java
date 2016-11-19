@@ -1,24 +1,23 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class HandTrajectoryTask extends BehaviorTask
+public class HandTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
 {
    private final HandTrajectoryMessage handTrajectoryMessage;
    private final HandTrajectoryBehavior handTrajectoryBehavior;
 
-   public HandTrajectoryTask(HandTrajectoryMessage handTrajectoryMessage, HandTrajectoryBehavior handTrajectoryBehavior, DoubleYoVariable yoTime, double sleepTime)
+   public HandTrajectoryTask(HandTrajectoryMessage handTrajectoryMessage, HandTrajectoryBehavior handTrajectoryBehavior)
    {
-      super(handTrajectoryBehavior, yoTime, sleepTime);
-      this.handTrajectoryBehavior = handTrajectoryBehavior;
-      this.handTrajectoryMessage = handTrajectoryMessage;
+      this(null, handTrajectoryMessage, handTrajectoryBehavior);
    }
 
-   public HandTrajectoryTask(HandTrajectoryMessage handTrajectoryMessage, HandTrajectoryBehavior handTrajectoryBehavior, DoubleYoVariable yoTime)
+   
+   public HandTrajectoryTask(E stateEnum,HandTrajectoryMessage handTrajectoryMessage, HandTrajectoryBehavior handTrajectoryBehavior)
    {
-      super(handTrajectoryBehavior, yoTime);
+      super(stateEnum,handTrajectoryBehavior);
       this.handTrajectoryBehavior = handTrajectoryBehavior;
       this.handTrajectoryMessage = handTrajectoryMessage;
    }

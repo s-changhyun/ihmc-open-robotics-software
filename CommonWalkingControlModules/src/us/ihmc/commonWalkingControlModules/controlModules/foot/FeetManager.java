@@ -142,9 +142,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTime)
+   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTime, boolean continuousReplan)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep, swingTime);
+      footControlModules.get(swingSide).replanTrajectory(footstep, swingTime, continuousReplan);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
@@ -324,9 +324,15 @@ public class FeetManager
          footControlModules.get(robotSide).resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
-   public void requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)
    {
-      footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
+      return footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)

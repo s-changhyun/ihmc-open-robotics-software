@@ -4,8 +4,8 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -846,6 +846,12 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public double getCoPErrorThresholdForHighCoPDamping()
    {
       return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public boolean useOptimizationBasedICPController()
+   {
+      return false;
    }
 
    @Override

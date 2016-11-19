@@ -14,8 +14,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,11 +28,12 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
+   private static final boolean DEBUG_VELOCITY_WITH_FD = false;
+
    private final boolean runningOnRealRobot;
 
    private final double estimatorDT;
 
-   private final double kinematicsPelvisLinearVelocityFilterFreqInHertz;
    private final double kinematicsPelvisPositionFilterFreqInHertz;
 
    private final double lowerBodyJointVelocityBacklashSlopTime;
@@ -99,7 +100,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
-      kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0;
    }
 
    @Override
@@ -110,6 +110,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
+      if (DEBUG_VELOCITY_WITH_FD)
+      {
+         DoubleYoVariable dummyAlpha = new DoubleYoVariable("dummyAlpha", registry);
+         sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlpha, true);
+      }
 
       DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
@@ -196,12 +201,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return kinematicsPelvisLinearVelocityFilterFreqInHertz;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
@@ -266,7 +265,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getPelvisVelocityBacklashSlopTime()
+   public double getIMUJointVelocityEstimationBacklashSlopTime()
    {
       return lowerBodyJointVelocityBacklashSlopTime;
    }
@@ -285,18 +284,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
    }

@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -31,13 +32,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
 {
    private YoVariableRegistry registry;
@@ -122,7 +122,6 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
       pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseCreator);
-      pelvisCorrector.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
    }
    
    private void generatePelvisWayPoints()
@@ -245,7 +244,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    
    private BooleanYoVariable isRotationCorrectionEnabled;
    
-   @DeployableTestMethod(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
@@ -317,7 +316,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {

@@ -2,13 +2,13 @@ package us.ihmc.atlas.roughTerrainWalking;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.HumanoidLineContactWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.roughTerrainWalking.HumanoidLineContactWalkingTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);

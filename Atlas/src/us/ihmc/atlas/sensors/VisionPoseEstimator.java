@@ -18,13 +18,12 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.darpaRoboticsChallenge.sensors.DetectedObjectId;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
@@ -47,20 +46,20 @@ public class VisionPoseEstimator implements DRCStereoListener
 
    PacketCommunicator communicator;
    LinkedBlockingQueue<ImmutablePair<CameraData, RigidBodyTransform>> imagesToProcess = new LinkedBlockingQueue<>(2);
-   SDFFullHumanoidRobotModelFactory modelFactory;
+   FullHumanoidRobotModelFactory modelFactory;
    PointCloudDataReceiver pointCloudDataReceiver;
 
-   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, SDFFullHumanoidRobotModelFactory modelFactory,
+   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, FullHumanoidRobotModelFactory modelFactory,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, boolean runningOnRealRobot)
    {
       if (runningOnRealRobot)
       {
          //         startChessBoardDetector(new OpenCVChessboardPoseEstimator(4, 5, 0.01), DetectedObjectManager.DetectedObjectId.RIGHT_HAND.ordinal());
-         startChessBoardDetector(new OpenCVChessboardPoseEstimator(4, 7, 0.01), DetectedObjectId.RIGHT_HAND.ordinal());
+         startChessBoardDetector(new OpenCVChessboardPoseEstimator(4, 7, 0.01), 0);
       }
       else
       {
-         startChessBoardDetector(new OpenCVChessboardPoseEstimator(5, 6, 0.00935), DetectedObjectId.RIGHT_HAND.ordinal());
+         startChessBoardDetector(new OpenCVChessboardPoseEstimator(5, 6, 0.00935), 0);
       }
 
       this.communicator = packetCommunicator;

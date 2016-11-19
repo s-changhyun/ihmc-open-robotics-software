@@ -12,13 +12,14 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMultiRobotTestInterface
 {
@@ -31,7 +32,7 @@ public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMul
       try
       {
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -53,13 +54,13 @@ public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMul
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 90.0)
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 600000)
    public void testWalkingForward() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(0.2);
+      variables.getYoPlanarVelocityInputX().set(0.15);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.3));
@@ -68,15 +69,15 @@ public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMul
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 600000)
    public void testWalkingBackward() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(-0.2);
+      variables.getYoPlanarVelocityInputX().set(-0.10);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 10.0));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 20.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.6));
       conductor.simulate();
       

@@ -16,12 +16,11 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.DRCStartingLocation;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
+import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
-import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
-import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -30,17 +29,18 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.DarpaRoboticsChallengeFinalsEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
@@ -71,7 +71,7 @@ public class AtlasFinalsWorldStairsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 70.3, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+	@ContinuousIntegrationTest(estimatedDuration = 70.3, categoriesOverride = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
    @Test(timeout = 350000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -82,7 +82,7 @@ public class AtlasFinalsWorldStairsTest
 
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       robotModel.addMoreFootContactPointsSimOnly(10, 2, true);
-      DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
+      DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
               robotModel);
 
@@ -90,7 +90,7 @@ public class AtlasFinalsWorldStairsTest
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
-      SixDoFJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.125);
@@ -119,7 +119,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 	@Ignore("Improve the feet stability.")
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -130,7 +130,7 @@ public class AtlasFinalsWorldStairsTest
 
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       robotModel.addMoreFootContactPointsSimOnly(8, 3, false);
-      DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
+      DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
             robotModel);
 
@@ -138,7 +138,7 @@ public class AtlasFinalsWorldStairsTest
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);    // 2.0);
-      SixDoFJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.15);

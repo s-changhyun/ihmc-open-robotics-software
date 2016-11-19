@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -10,8 +10,9 @@ public class EnableLidarBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataStateCommand enableLidarPacket;
+   private LidarState lidarState;
 
-   public EnableLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EnableLidarBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
 
@@ -20,19 +21,27 @@ public class EnableLidarBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      enableLidarPacket = new DepthDataStateCommand(LidarState.ENABLE);
+      
+         enableLidarPacket = new DepthDataStateCommand(lidarState);
+         
+         if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
+         {
+            sendPacketToNetworkProcessor();
+         }
+      
+   }
 
-      if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
-      {
-         sendPacketToNetworkProcessor();
-      }
+   public void setLidarState(LidarState lidarState)
+   {
+      this.lidarState = lidarState;
    }
 
    private void sendPacketToNetworkProcessor()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacketToNetworkProcessor(enableLidarPacket);
+         System.out.println("EnableLidarBehavior: sending enable packet");
+         sendPacket(enableLidarPacket);
          packetHasBeenSent.set(true);
       }
    }
@@ -43,7 +52,7 @@ public class EnableLidarBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -52,25 +61,7 @@ public class EnableLidarBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
-   }
-
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -79,27 +70,5 @@ public class EnableLidarBehavior extends AbstractBehavior
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      if (enableLidarPacket != null)
-         return true;
-      else
-         return false;
-   }
+  
 }

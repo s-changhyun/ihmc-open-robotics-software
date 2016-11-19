@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -29,12 +29,12 @@ public class GoHomeBehavior extends AbstractBehavior
    protected final BooleanYoVariable hasInputBeenSet;
    private final BooleanYoVariable isDone;
 
-   public GoHomeBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public GoHomeBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
 
-   public GoHomeBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public GoHomeBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
 
@@ -68,7 +68,7 @@ public class GoHomeBehavior extends AbstractBehavior
    {
       trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
 
-      if (!isDone.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
+      if (!isDone.getBooleanValue() && !isPaused.getBooleanValue() && !isAborted.getBooleanValue()
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
@@ -85,12 +85,12 @@ public class GoHomeBehavior extends AbstractBehavior
    private void sendOutgoingPacketToControllerAndNetworkProcessor()
    {
       
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingMessage.setDestination(PacketDestination.BROADCAST);
 
          sendPacketToController(outgoingMessage);
-         sendPacketToNetworkProcessor(outgoingMessage);
+         sendPacket(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 
@@ -132,7 +132,7 @@ public class GoHomeBehavior extends AbstractBehavior
       outgoingMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       hasInputBeenSet.set(false);
 
@@ -143,10 +143,10 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
       stopArmMotion();
-      isStopped.set(true);
+      isAborted.set(true);
    }
 
    @Override
@@ -187,22 +187,7 @@ public class GoHomeBehavior extends AbstractBehavior
       return isDone.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

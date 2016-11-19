@@ -5,15 +5,15 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.DoubleStepGroundProfile;
 
 public class DRCDoubleElevationChangeSimulation
@@ -62,7 +62,7 @@ public class DRCDoubleElevationChangeSimulation
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());    //(new FlatGroundProfile(groundHeight), robotInterface.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight,0);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight,0);
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;

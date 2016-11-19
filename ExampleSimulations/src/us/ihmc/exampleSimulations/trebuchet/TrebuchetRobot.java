@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.trebuchet;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -374,8 +374,8 @@ public class TrebuchetRobot extends Robot
 
    public void applyFrictionDamping()
    {
-      xSliderJoint.setTau(-1500.0 * xSliderJoint.getQD().getDoubleValue());
-      pivotJoint.setTau(-8000.0 * pivotJoint.getQD().getDoubleValue());
+      xSliderJoint.setTau(-1500.0 * xSliderJoint.getQDYoVariable().getDoubleValue());
+      pivotJoint.setTau(-8000.0 * pivotJoint.getQDYoVariable().getDoubleValue());
    }
 
    public ExternalForcePoint getBallCenterExternalForcePoint()
@@ -390,6 +390,6 @@ public class TrebuchetRobot extends Robot
 
    public double getPivotAngle()
    {
-      return pivotJoint.getQ().getDoubleValue();
+      return pivotJoint.getQYoVariable().getDoubleValue();
    }
 }

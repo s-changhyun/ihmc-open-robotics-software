@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -162,17 +162,17 @@ public class Step0Robot extends Robot
    
    public void setKneeForce(double desiredTau)
    {
-      this.kneeJoint.tau.set(desiredTau);
+      this.kneeJoint.setTau(desiredTau);
    }
    
    public double getKneePositionZ()
    {
-      return kneeJoint.q.getDoubleValue();
+      return kneeJoint.getQ();
    }
    
    public double getKneeVelocityZ()
    {
-      return kneeJoint.qd.getDoubleValue();
+      return kneeJoint.getQD();
    }
    
    public double getBodyPositionZ()

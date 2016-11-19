@@ -2,14 +2,15 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -17,9 +18,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.ModularRobotController;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -33,11 +37,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.JointAxisVisualizer;
-import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
@@ -61,7 +61,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
 
-   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
+   private final FullHumanoidRobotModel controllerFullRobotModel;
    private final OutputProcessor outputProcessor;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
@@ -201,7 +201,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   private ModularRobotController createMomentumBasedController(SDFFullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
+   private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
          MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
          ContactSensorHolder contactSensorHolder,
@@ -265,7 +265,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    public static FullInverseDynamicsStructure createInverseDynamicsStructure(FullRobotModel fullRobotModel)
    {
       RigidBody elevator = fullRobotModel.getElevator();
-      SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
       RigidBody estimationLink = fullRobotModel.getPelvis();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);

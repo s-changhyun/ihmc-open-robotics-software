@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-public class JointDescription
+public class JointDescription implements RobotDescriptionNode
 {
    private String name;
    private final ArrayList<JointDescription> childrenJointDescriptions = new ArrayList<>();
@@ -32,6 +32,7 @@ public class JointDescription
       this.offsetFromParentJoint.set(offsetFromParentJoint);
    }
 
+   @Override
    public String getName()
    {
       return name;
@@ -70,8 +71,21 @@ public class JointDescription
    public void addJoint(JointDescription childJointDescription)
    {
       childrenJointDescriptions.add(childJointDescription);
+
+      if (childJointDescription.getParentJoint() != null)
+      {
+         throw new RuntimeException("JointDescription " + childJointDescription.getName() + "already has a parent joint: " + childJointDescription.getParentJoint().getName());
+      }
+
+      childJointDescription.setParentJoint(this);
+   }
+   
+   public boolean removeJoint(JointDescription childJointDescription)
+   {
+      return childrenJointDescriptions.remove(childJointDescription);
    }
 
+   @Override
    public ArrayList<JointDescription> getChildrenJoints()
    {
       return childrenJointDescriptions;

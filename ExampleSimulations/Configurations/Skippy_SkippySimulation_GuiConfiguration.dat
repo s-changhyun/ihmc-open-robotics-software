@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauHipJointX,root.Skippy.SkippyController.tauHipJointY,root.Skippy.SkippyController.tauHipJointZ</Variables>
+		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo,root.Skippy.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauShoulderJointX,root.Skippy.SkippyController.tauShoulderJointY,root.Skippy.SkippyController.tauShoulderJointZ</Variables>
+		<Variables>root.Skippy.q_hip,root.Skippy.qd_hip,root.Skippy.SkippyController.legToTorsoAngle</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauOnHipJointAxisX,root.Skippy.SkippyController.tauOnHipJointAxisY,root.Skippy.SkippyController.tauOnHipJointAxisZ</Variables>
+		<Variables>root.Skippy.tau_hip,root.Skippy.SkippyController.tauOnHipJointAxis</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauOnShoulderJointAxisX,root.Skippy.SkippyController.tauOnShoulderJointAxisY,root.Skippy.SkippyController.tauOnShoulderJointAxisZ</Variables>
+		<Variables>root.Skippy.SkippyController.comVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -57,99 +57,8 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>1</ScreenID>
-<WindowLocation>-1926.0, 94.0</WindowLocation>
-<WindowSize>1932.0, 1165.0</WindowSize>
-<GraphGroup>
-	<Cols>2</Cols>
-	<Graph>
-		<Variables>root.Skippy.gc_foot_fs,root.Skippy.tau_shoulderJoint,root.Skippy.SkippyController.tauShoulderJointProjectionModulus</Variables>
-		<GraphConfiguration>
-			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.tau_hip,root.Skippy.SkippyController.tauHipJointProjectionModulus,root.Skippy.SkippyController.stateMachine</Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.lastGroundReactionForceZ,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.SkippyController.robotWeight</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.theCMPFromIcpX,root.Skippy.SkippyController.theCMPFromIcpY</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.averageZ0,root.Skippy.SkippyController.stateMachine</Variables>
-		<GraphConfiguration>
-			<Name>config9</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.rateOfChangeOfAngularMomentumX,root.Skippy.SkippyController.rateOfChangeOfAngularMomentumY,root.Skippy.SkippyController.rateOfChangeOfAngularMomentumZ,root.Skippy.SkippyController.rateOfChangeOfAMModulus</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.rateOfChangeOfAMModulus</Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window1>
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>
@@ -158,9 +67,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>40.0</Camera X>
+ <Camera X>10.0</Camera X>
  <Camera Y>0.0</Camera Y>
- <Camera Z>0.2</Camera Z>
+ <Camera Z>2.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

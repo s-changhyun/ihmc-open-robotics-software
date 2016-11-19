@@ -6,15 +6,15 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CombinedTerrainObjectTest
 {
 
    //TODO: Flesh out this test case to be a really good one.
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTwoIntersectingBoxes()
    {

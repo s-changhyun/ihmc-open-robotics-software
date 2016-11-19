@@ -2,7 +2,7 @@ package us.ihmc.atlas.physics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -11,6 +11,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -38,7 +39,7 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
    }
 
    @Override
-   public void setup(Robot robot, ScsCollisionDetector collisionDetector)
+   public void setup(Robot robot, ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler)
    {
       String leftFootJointName = jointMap.getJointBeforeFootName(RobotSide.LEFT);
       String rightFootJointName = jointMap.getJointBeforeFootName(RobotSide.RIGHT);

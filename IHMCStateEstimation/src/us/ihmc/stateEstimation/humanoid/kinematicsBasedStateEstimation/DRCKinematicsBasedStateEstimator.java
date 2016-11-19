@@ -11,6 +11,8 @@ import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -38,16 +40,14 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
-
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
+   public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -61,6 +61,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
+   private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -73,6 +74,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final BooleanYoVariable usePelvisCorrector;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+
+   private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
@@ -132,11 +135,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       boolean isAccelerationIncludingGravity = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
       imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), twistCalculator, gravitationalAcceleration, isAccelerationIncludingGravity, estimatorDT, registry);
       imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, estimatorDT, registry);
+      imuYawDriftEstimator.configureModuleParameters(stateEstimatorParameters);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
       {
-         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, imuYawDriftEstimator, estimatorDT, registry);
       }
       else
       {
@@ -158,6 +163,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          copVisualizer = null;
       }
+
+      if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
+         jointTorqueFromForceSensorVisualizer = new JointTorqueFromForceSensorVisualizer(footSwitches, registry);
+      else
+         jointTorqueFromForceSensorVisualizer = null;
 
       visualizeMeasurementFrames = visualizeMeasurementFrames && yoGraphicsListRegistry != null;
 
@@ -257,6 +267,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             {
                pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
             }
+
             if(forceSensorStateUpdater != null)
             {
                forceSensorStateUpdater.updateForceSensorState();
@@ -286,6 +297,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          for (int i = 0; i < dynamicGraphicMeasurementFrames.size(); i++)
             dynamicGraphicMeasurementFrames.get(i).update();
       }
+
+      if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
+         jointTorqueFromForceSensorVisualizer.update();
    }
 
    @Override

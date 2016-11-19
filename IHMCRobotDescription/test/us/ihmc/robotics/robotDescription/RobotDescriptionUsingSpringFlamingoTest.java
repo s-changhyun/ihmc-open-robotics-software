@@ -6,11 +6,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 
 public class RobotDescriptionUsingSpringFlamingoTest
 {
@@ -55,7 +56,8 @@ public class RobotDescriptionUsingSpringFlamingoTest
    private static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
    private static final double HIP_OFFSET_Y = 0.12;
 
-   @Test
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 300)
+   @Test(timeout = 1000)
    public void testUsingSpringFlamingoRobotDescription()
    {
       FloatingPlanarJointDescription plane;

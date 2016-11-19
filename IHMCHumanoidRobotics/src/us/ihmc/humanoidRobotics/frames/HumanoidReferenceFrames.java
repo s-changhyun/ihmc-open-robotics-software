@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.frames;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -273,7 +273,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public ReferenceFrame getKneeFrame(RobotSide robotSide)
    {
-      return getLegJointFrame(robotSide, LegJointName.KNEE);
+      return getLegJointFrame(robotSide, LegJointName.KNEE_PITCH);
    }
 
    public ReferenceFrame getAnkleRollFrame(RobotSide robotSide)
@@ -307,6 +307,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return midFeetUnderPelvisWalkDirectionFrame;
    }
 
+   /**
+    * Returns the control frame of a hand.
+    * The control frame is robot specific and is meant to be located at a key position for grasping.
+    * <p>
+    * TODO rename the method to getHandControlFrame(RobotSide).
+    * @param robotSide from which hand the control frame has to be returned. 
+    * @return the hand control frame.
+    */
    public ReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHandControlFrame(robotSide);

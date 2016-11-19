@@ -13,14 +13,15 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlTurningVelocityTest implements QuadrupedMultiRobotTestInterface
 {
@@ -33,7 +34,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       try
       {
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.POSITION);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -55,7 +56,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
    @Test(timeout = 600000)
    public void testTurnInPlaceRegularSpeed() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -71,7 +72,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    }
    
    //"Turn in place slowly still fails due to CoM shifting outside support polygon. Need to fix it..."
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
    @Test(timeout = 600000)
    public void testTurnInPlaceSlowly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -87,7 +88,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 500.0)
+   @ContinuousIntegrationTest(estimatedDuration = 500.0)
    @Test(timeout = 2000000)
    public void testWalkingBackwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

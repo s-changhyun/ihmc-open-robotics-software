@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
@@ -13,7 +13,7 @@ public class ClearLidarBehavior extends AbstractBehavior
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataClearCommand clearLidarPacket;
 
-   public ClearLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public ClearLidarBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
 
@@ -34,9 +34,9 @@ public class ClearLidarBehavior extends AbstractBehavior
 
    private void sendPacketToNetworkProcessor()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacketToNetworkProcessor(clearLidarPacket);
+         sendPacket(clearLidarPacket);
          packetHasBeenSent.set(true);
       }
    }
@@ -45,9 +45,7 @@ public class ClearLidarBehavior extends AbstractBehavior
    public void initialize()
    {
       packetHasBeenSent.set(false);
-      
-      isPaused.set(false);
-      isStopped.set(false);
+      super.initialize();
    }
 
    @Override
@@ -55,26 +53,7 @@ public class ClearLidarBehavior extends AbstractBehavior
    {
       packetHasBeenSent.set(false);
 
-      isPaused.set(false);
-      isStopped.set(false);
-   }
-
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
+        super.doPostBehaviorCleanup();
    }
 
    @Override
@@ -83,20 +62,6 @@ public class ClearLidarBehavior extends AbstractBehavior
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
 
    public boolean hasInputBeenSet()
    {

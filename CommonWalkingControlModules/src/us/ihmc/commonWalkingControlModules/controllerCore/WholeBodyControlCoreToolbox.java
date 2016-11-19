@@ -2,13 +2,14 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import java.util.List;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -17,13 +18,12 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WholeBodyControlCoreToolbox
 {
@@ -143,7 +143,7 @@ public class WholeBodyControlCoreToolbox
       return inverseDynamicsCalculator;
    }
 
-   public SixDoFJoint getRobotRootJoint()
+   public FloatingInverseDynamicsJoint getRobotRootJoint()
    {
       return fullRobotModel.getRootJoint();
    }

@@ -21,19 +21,18 @@ import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
-import us.ihmc.robotDataCommunication.logger.LogPropertiesReader;
-import us.ihmc.robotDataCommunication.logger.MultiVideoDataPlayer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
-import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
+import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
+import us.ihmc.robotDataVisualizer.logger.MultiVideoDataPlayer;
+import us.ihmc.robotDataVisualizer.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -46,7 +45,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.gui.SwingUtils;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -81,7 +79,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
       DRCRobotJointMap jointMap = model.getJointMap();
       ArmJointName[] joints = jointMap.getArmJointNames();
-      SDFFullHumanoidRobotModel robotModel = model.createFullRobotModel();
+      FullHumanoidRobotModel robotModel = model.createFullRobotModel();
       boolean showGUIAndSaveSCSVideo = false;
       boolean showCameraVideo = false;
 
@@ -359,13 +357,15 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
-      boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
+//      boolean useCollisionMeshes = false;
+//      boolean enableTorqueVelocityLimits = true;
+//      boolean enableJointDamping = true;
+//
+//      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+//      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+//      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
-      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = robotModel.getRobotDescription();
 
       robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, parser.getJointStates(),
             parser.getYoVariablesList(), logProperties, scs);

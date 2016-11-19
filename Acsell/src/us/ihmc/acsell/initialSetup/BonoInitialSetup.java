@@ -3,19 +3,19 @@ package us.ihmc.acsell.initialSetup;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
  * Created by dstephen on 2/14/14.
  */
-public class BonoInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class BonoInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private double groundZ;
    private double initialYaw;
@@ -29,7 +29,7 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
       this.initialYaw = initialYaw;
    }
 
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       for(RobotSide robotSide : RobotSide.values())
       {

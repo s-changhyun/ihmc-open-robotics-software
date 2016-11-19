@@ -50,6 +50,7 @@ public class JointPrivilegedConfigurationHandler
 
    private final int numberOfDoFs;
 
+   // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
@@ -85,7 +86,7 @@ public class JointPrivilegedConfigurationHandler
          yoJointPriviligedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
       }
 
-      configurationGain.set(40.0); //20.0);
+      configurationGain.set(20.0);
       velocityGain.set(6.0);
       maxVelocity.set(2.0);
       maxAcceleration.set(Double.POSITIVE_INFINITY);

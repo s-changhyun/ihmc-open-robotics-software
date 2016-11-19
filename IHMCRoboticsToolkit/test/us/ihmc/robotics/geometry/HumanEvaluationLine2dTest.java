@@ -18,11 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class HumanEvaluationLine2dTest
 {
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
@@ -74,7 +74,7 @@ public class HumanEvaluationLine2dTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
@@ -118,7 +118,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
@@ -176,7 +176,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
@@ -204,7 +204,7 @@ public class HumanEvaluationLine2dTest
       // TODO: test rotation
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testContainsEpsilon()
    {
@@ -234,7 +234,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
@@ -248,7 +248,7 @@ public class HumanEvaluationLine2dTest
             vector.getY(), EPSILON_FOR_EQUALS);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
@@ -261,7 +261,7 @@ public class HumanEvaluationLine2dTest
       assertTrue("Point should have been on the line", line2dPointPoint.containsEpsilon(shouldBeOnLineToo, epsilon));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
@@ -311,7 +311,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
@@ -328,7 +328,7 @@ public class HumanEvaluationLine2dTest
       assertEquals(directionVectorBefore, someLine.normalizedVector);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
@@ -348,7 +348,7 @@ public class HumanEvaluationLine2dTest
       assertNotSame(someLine, copy);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
@@ -365,7 +365,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {

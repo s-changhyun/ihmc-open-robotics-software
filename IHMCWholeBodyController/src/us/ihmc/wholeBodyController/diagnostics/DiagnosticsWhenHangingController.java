@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -34,6 +34,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -44,7 +45,6 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class DiagnosticsWhenHangingController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
@@ -708,8 +708,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       makeLegJointHelper(RobotSide.LEFT, 1.0, false, LegJointName.HIP_ROLL);
       makeLegJointHelper(RobotSide.RIGHT, -1.0, false, LegJointName.HIP_ROLL);
 
-      makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.KNEE);
-      makeLegJointHelper(RobotSide.RIGHT, -1.0, true, LegJointName.KNEE);
+      makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.KNEE_PITCH);
+      makeLegJointHelper(RobotSide.RIGHT, -1.0, true, LegJointName.KNEE_PITCH);
 
       makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.ANKLE_PITCH);
       makeLegJointHelper(RobotSide.RIGHT, 1.0, true, LegJointName.ANKLE_PITCH);
@@ -828,8 +828,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setProportionalGain(165);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setDerivativeGain(6.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setProportionalGain(80.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setDerivativeGain(3.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setProportionalGain(80.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setDerivativeGain(3.0);
 
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setProportionalGain(20.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setDerivativeGain(2.0);

@@ -1,18 +1,19 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
+import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceLimits;
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimization;
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
-import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
-import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedTaskSpaceController
 {
@@ -132,8 +133,9 @@ public class QuadrupedTaskSpaceController
    private final QuadrupedContactForceOptimization contactForceOptimization;
    private final FrameVector contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
+   private final LongYoVariable contactForceOptimizationSolveTime = new LongYoVariable("contactForceOptimizationSolveTime", registry);
 
-   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
+   public QuadrupedTaskSpaceController(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // virtual model controller
@@ -164,8 +166,11 @@ public class QuadrupedTaskSpaceController
       }
       contactForceOptimization.setComForceCommand(commands.getComForce());
       contactForceOptimization.setComTorqueCommand(commands.getComTorque());
+      long timeContactForceOptimizationSolverStart = System.nanoTime();
       contactForceOptimization.solve(settings.getContactForceLimits(), settings.getContactForceOptimizationSettings());
-
+      long timeContactForceOptimizationSolverEnds = System.nanoTime();
+      contactForceOptimizationSolveTime.set(timeContactForceOptimizationSolverEnds - timeContactForceOptimizationSolverStart);
+      
       // compute leg joint torques using jacobian transpose
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

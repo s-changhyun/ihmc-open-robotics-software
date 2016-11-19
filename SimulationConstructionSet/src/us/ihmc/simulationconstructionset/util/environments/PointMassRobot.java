@@ -4,15 +4,15 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 
 public class PointMassRobot extends Robot
@@ -120,18 +120,18 @@ public class PointMassRobot extends Robot
 
    public void getPosition(Tuple3d tuple3d)
    {
-      double x = xJoint.getQ().getDoubleValue();
-      double y = yJoint.getQ().getDoubleValue();
-      double z = zJoint.getQ().getDoubleValue();
+      double x = xJoint.getQYoVariable().getDoubleValue();
+      double y = yJoint.getQYoVariable().getDoubleValue();
+      double z = zJoint.getQYoVariable().getDoubleValue();
 
       tuple3d.set(x, y, z);
    }
 
    public void getVelocity(Tuple3d tuple3d)
    {
-      double xd = xJoint.getQD().getDoubleValue();
-      double yd = yJoint.getQD().getDoubleValue();
-      double zd = zJoint.getQD().getDoubleValue();
+      double xd = xJoint.getQDYoVariable().getDoubleValue();
+      double yd = yJoint.getQDYoVariable().getDoubleValue();
+      double zd = zJoint.getQDYoVariable().getDoubleValue();
 
       tuple3d.set(xd, yd, zd);
    }

@@ -2,7 +2,7 @@ package us.ihmc.atlas.velocityControlEvaluation;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -47,12 +47,12 @@ public class VelocityControlEvaluationRobot extends Robot
 
    public double getX()
    {
-      return rootJoint.getQ().getDoubleValue();
+      return rootJoint.getQYoVariable().getDoubleValue();
    }
    
    public double getXDot()
    {
-      return rootJoint.getQD().getDoubleValue();
+      return rootJoint.getQDYoVariable().getDoubleValue();
    }
 
   

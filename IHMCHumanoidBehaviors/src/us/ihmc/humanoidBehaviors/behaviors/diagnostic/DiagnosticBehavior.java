@@ -11,12 +11,11 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -26,8 +25,12 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
@@ -37,6 +40,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisOrientationTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.SleepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
@@ -78,15 +82,14 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -124,6 +127,8 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
    private final TurnInPlaceBehavior turnInPlaceBehavior;
+   
+   private final SleepBehavior sleepBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
@@ -160,7 +165,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final WalkingControllerParameters walkingControllerParameters;
 
-   private enum DiagnosticTask
+   public enum DiagnosticTask
    {
       CHEST_ROTATIONS,
       PELVIS_ROTATIONS,
@@ -237,7 +242,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
+         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
@@ -403,7 +408,9 @@ public class DiagnosticBehavior extends AbstractBehavior
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
 
-      this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
+      this.attachNetworkListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
+      
+      sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
    }
 
    private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)
@@ -1162,7 +1169,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       //      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
       //      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
       //      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
-      //      
+      //
 
       //put the foot back on the ground
       submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
@@ -1649,11 +1656,15 @@ public class DiagnosticBehavior extends AbstractBehavior
       targetPoseInWorld.changeFrame(worldFrame);
 
       WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath,
-            footstepLength.getDoubleValue() * percentOfMaxFootstepLength, swingTime.getDoubleValue(), transferTime.getDoubleValue(), yoTime);
+            footstepLength.getDoubleValue() * percentOfMaxFootstepLength, swingTime.getDoubleValue(), transferTime.getDoubleValue());
       if (parallelize)
+      {
          pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToLocationTask);
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(walkToLocationTask);
+      }
    }
 
    private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw, double angleRelativeToPath)
@@ -1684,7 +1695,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             footstepDataList.add(footstepData);
          }
       }
-      pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
+      pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
    }
 
    private void sequenceSquareUp()
@@ -1711,7 +1722,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
          footstepDataList.add(footstepData);
-         pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
+         pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
       }
 
    }
@@ -1769,7 +1780,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       SideDependentList<double[]> armsDown1 = computeSymmetricArmJointAngles(upperArmDown1, 0.0, null, true);
 
       int numberOfHandPoses = 10;
-      
+
       TrajectoryPoint1DCalculator calculator = new TrajectoryPoint1DCalculator();
 
       for (RobotSide flyingSide : RobotSide.values)
@@ -1814,7 +1825,14 @@ public class DiagnosticBehavior extends AbstractBehavior
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
-               new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide), yoTime, sleepTimeBetweenPoses.getDoubleValue()));
+               new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide)));
+         
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+         
+         
+         
+         
+
       }
 
       // Put the arms in front
@@ -1928,48 +1946,79 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitChestHomeCommand(boolean parallelize)
    {
       GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
-      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue());
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior);
       if (parallelize)
+      {
          pipeLine.submitTaskForPallelPipesStage(chestGoHomeBehavior, goHomeTask);
+         pipeLine.submitTaskForPallelPipesStage(chestGoHomeBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(goHomeTask);
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
    }
 
    private void submitDesiredChestOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestTrajectoryBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior,
+            trajectoryTime.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior, chestOrientationTask);
+      {
+        pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior, chestOrientationTask);
+        pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(chestOrientationTask);
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
    }
 
    private void submitDesiredPelvisHeight(boolean parallelize, double offsetHeight)
    {
-      SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint);
       desiredPelvisPosition.setZ(offsetHeight);
       desiredPelvisPosition.changeFrame(worldFrame);
-      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(desiredPelvisPosition.getZ(), yoTime, pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue());
+      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(desiredPelvisPosition.getZ(), pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue());
       if (parallelize)
+      {
          pipeLine.submitTaskForPallelPipesStage(pelvisHeightTrajectoryBehavior, comHeightTask);
+         pipeLine.submitTaskForPallelPipesStage(pelvisHeightTrajectoryBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(comHeightTask);
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
    }
 
    private void submitPelvisHomeCommand(boolean parallelize)
    {
       GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.PELVIS, trajectoryTime.getDoubleValue());
-      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue());
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior);
 
       if (parallelize)
+      {
          pipeLine.submitTaskForPallelPipesStage(pelvisGoHomeBehavior, goHomeTask);
+         pipeLine.submitTaskForPallelPipesStage(pelvisGoHomeBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(goHomeTask);
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
    }
 
    private void submitDesiredPelvisOrientation(boolean parallelize, double yaw, double pitch, double roll)
@@ -1983,12 +2032,20 @@ public class DiagnosticBehavior extends AbstractBehavior
       desiredPelvisOrientation.changeFrame(worldFrame);
       Quat4d desiredQuaternion = new Quat4d(desiredPelvisOrientation.getQuaternion());
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
-      PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, yoTime, pelvisOrientationTrajectoryBehavior, sleepTime);
+      PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, pelvisOrientationTrajectoryBehavior);
 
       if (parallelize)
+      {
          pipeLine.submitTaskForPallelPipesStage(pelvisOrientationTrajectoryBehavior, task);
+         pipeLine.submitTaskForPallelPipesStage(pelvisOrientationTrajectoryBehavior,createSleepTask(sleepTime));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(task);
+         pipeLine.submitSingleTaskStage(createSleepTask(sleepTime));
+
+      }
    }
 
    private void submitDesiredPelvisPositionOffset(boolean parallelize, double dx, double dy, double dz)
@@ -1998,7 +2055,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredPelvisPositionOffsetAndOrientation(boolean parallelize, double dx, double dy, double dz, double yaw, double pitch, double roll)
    {
-      SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePose desiredPelvisPose = new FramePose(frameAfterRootJoint);
       desiredPelvisPose.setPosition(dx, dy, dz);
       desiredPelvisPose.setYawPitchRoll(yaw, pitch, roll);
@@ -2007,11 +2064,19 @@ public class DiagnosticBehavior extends AbstractBehavior
       Quat4d orientation = new Quat4d();
       desiredPelvisPose.getPose(position, orientation);
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
-      PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, yoTime, pelvisTrajectoryBehavior, sleepTimeBetweenPoses.getDoubleValue());
+      PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, pelvisTrajectoryBehavior);
       if (parallelize)
+      {
          pipeLine.submitTaskForPallelPipesStage(pelvisTrajectoryBehavior, task);
+         pipeLine.submitTaskForPallelPipesStage(pelvisTrajectoryBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(task);
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
    }
 
    private void submitArmGoHomeCommand(boolean parallelize)
@@ -2021,9 +2086,9 @@ public class DiagnosticBehavior extends AbstractBehavior
          GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
          GoHomeBehavior armGoHomeBehavior = armGoHomeBehaviors.get(robotSide);
          if (parallelize)
-            pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
+            pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior));
          else
-            pipeLine.submitSingleTaskStage(new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
+            pipeLine.submitSingleTaskStage(new GoHomeTask(goHomeMessage, armGoHomeBehavior));
       }
    }
 
@@ -2070,7 +2135,9 @@ public class DiagnosticBehavior extends AbstractBehavior
          }
          ArmTrajectoryBehavior armTrajectoryBehavior = armTrajectoryBehaviors.get(robotSide);
          ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
-         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue()));
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior));
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
       }
    }
 
@@ -2237,7 +2304,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FramePose footPose = new FramePose(desiredFootstepPose);
 
-      FootstepTask footstepTask = new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime);
+      FootstepTask footstepTask = new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose);
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(footstepListBehavior, footstepTask);
       else
@@ -2257,13 +2324,20 @@ public class DiagnosticBehavior extends AbstractBehavior
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      FootTrajectoryTask footPoseTask = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      FootTrajectoryTask footPoseTask = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footPoseBehavior,
+            trajectoryTime.getDoubleValue());
 
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, footPoseTask);
+      {
+        pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, footPoseTask);
+        pipeLine.submitTaskForPallelPipesStage(footPoseBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
+
+      }
       else
+      {
          pipeLine.submitSingleTaskStage(footPoseTask);
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));         
+      }
    }
 
    private void submitFootPose(boolean parallelize, RobotSide robotSide, ReferenceFrame referenceFrame, double x, double y, double z, double yaw, double pitch,
@@ -2495,6 +2569,11 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
+   public void requestDiagnosticBehavior(DiagnosticTask diagnosticTask)
+   {
+      requestedDiagnostic.set(diagnosticTask);
+   }
+
    private void sequenceTurnInPlace()
    {
       submitTurnInPlaceAngle(false, -Math.PI / 2.0 + 0.01); // little values to be sure in which direction the robot will turn
@@ -2506,10 +2585,10 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(turnInPlaceBehavior,
-               new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue(), yoTime));
+               new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue()));
       else
          pipeLine
-               .submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue(), yoTime));
+               .submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue()));
    }
 
    private void sequenceFootLift()
@@ -2630,7 +2709,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             TimeStampedTransform3D timeStampedTransform3D = new TimeStampedTransform3D(pelvisTransformWithOffset, timestamp);
             StampedPosePacket stampedPosePacket = new StampedPosePacket("/pelvis", timeStampedTransform3D, 1.0);
 
-            outgoingCommunicationBridge.sendPacketToController(stampedPosePacket);
+            communicationBridge.sendPacketToController(stampedPosePacket);
 
             previousIcpPacketSentTime.set(yoTime.getDoubleValue());
          }
@@ -2673,42 +2752,16 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         footstepListBehavior.consumeObjectFromNetworkProcessor(object);
-         walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
-         turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
-      }
-   }
+  
+
 
    @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
-         armTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
-         footstepListBehavior.consumeObjectFromController(object);
-         walkToLocationBehavior.consumeObjectFromController(object);
-         turnInPlaceBehavior.consumeObjectFromController(object);
-      }
-   }
-
-   @Override
-   public void stop()
+   public void abort()
    {
       pipeLine.clearAll();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+
 
    @Override
    public void pause()
@@ -2736,6 +2789,13 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
+   private BehaviorAction createSleepTask(double sleepTime)
+   {
+      SleepBehavior sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
+      SleepTask sleepTask = new SleepTask(sleepBehavior,sleepTime);
+      return sleepTask;
+   }
+   
    @Override
    public boolean isDone()
    {
@@ -2747,9 +2807,5 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return false;
-   }
+   
 }

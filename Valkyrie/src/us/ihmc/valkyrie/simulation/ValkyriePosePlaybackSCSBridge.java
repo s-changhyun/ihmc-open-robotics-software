@@ -2,11 +2,10 @@ package us.ihmc.valkyrie.simulation;
 
 import java.io.IOException;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.posePlayback.PosePlaybackSCSBridge;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -18,9 +17,9 @@ public class ValkyriePosePlaybackSCSBridge
       DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFFullHumanoidRobotModel fullRobotModelForSlider = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModelForSlider = robotModel.createFullRobotModel();
    
       new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider, robotModel.getControllerDT());
    

@@ -8,8 +8,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,6 +37,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     * PPS Parameters
     */
    private static final String MULTISENSE_SL_PPS_TOPIC = multisense_namespace + "/stamped_pps";
+   
+   /**
+    * Send robot data to ROS
+    */
+   public static final boolean SEND_ROBOT_DATA_TO_ROS = false;
 
    /**
     * Camera Parameters
@@ -92,6 +96,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_filtered_laser_as_point_cloud_topic_string = multisense_namespace+"/filtered_cloud";
    private static final String multisense_ground_point_cloud_topic_string = multisense_namespace+"/highly_filtered_cloud";
    private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
+   private static final String chestIMUSensor = "utorso_imu_sensor_chest";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
    private static EnumMap<DRCRobotModel.RobotTarget, ReferenceFrame> headIMUFramesWhenLevel=new EnumMap<>(DRCRobotModel.RobotTarget.class);
 
@@ -161,7 +166,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       cameraParameters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
       cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
-      setupROSLocationService = target == DRCRobotModel.RobotTarget.REAL_ROBOT || (target == DRCRobotModel.RobotTarget.SCS && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS);
+      setupROSLocationService = target == DRCRobotModel.RobotTarget.REAL_ROBOT || (target == DRCRobotModel.RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
       setupROSParameterSetters = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       isMultisenseHead = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
@@ -217,6 +222,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public String getPrimaryBodyImu()
    {
       return bodyIMUSensor;
+   }
+
+   public String getChestImu()
+   {
+      return chestIMUSensor;
    }
 
    @Override

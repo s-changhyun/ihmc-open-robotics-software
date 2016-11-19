@@ -1,11 +1,11 @@
 package us.ihmc.atlas.sensors;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.collisions.SDFCollisionBoxProvider;
+import us.ihmc.avatar.drcRobot.collisions.SDFCollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
@@ -30,7 +30,7 @@ public class AtlasCollisionBoxProvider extends SDFCollisionBoxProvider
          addCollisionShape(joint, hand);
          
          // Add extra collision sphere around the knee, to avoid hitting points there on the real robot
-         String kneeJoint = jointMap.getLegJointName(robotSide, LegJointName.KNEE);
+         String kneeJoint = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
          RigidBodyTransform kneePose = new RigidBodyTransform();
          kneePose.setRotationRollAndZeroTranslation(Math.PI / 2.0);
          kneePose.setTranslation(0.05, 0, 0.03);

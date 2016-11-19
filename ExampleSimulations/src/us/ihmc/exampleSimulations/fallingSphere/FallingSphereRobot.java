@@ -3,8 +3,11 @@ package us.ihmc.exampleSimulations.fallingSphere;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -15,14 +18,9 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.CollisionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class FallingSphereRobot extends Robot
 {
-   private static final long serialVersionUID = -2136782463667249055L;
-
    private static final double EPSILON = 0.2; // Coefficient of Restitution
    private static final double MU = 0.5; // Coefficient of Friction
    

@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -12,7 +13,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 
 public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
 {
@@ -93,7 +93,7 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    }
 
    @Override
-   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
 

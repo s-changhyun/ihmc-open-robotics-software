@@ -9,16 +9,16 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testRootRegistryNothingFancy()
    {
@@ -58,7 +58,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000) 
    public void testVarGroups()
    {
@@ -105,7 +105,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {

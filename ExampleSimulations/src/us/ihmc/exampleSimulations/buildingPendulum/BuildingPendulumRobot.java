@@ -2,8 +2,8 @@ package us.ihmc.exampleSimulations.buildingPendulum;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -81,7 +81,7 @@ public class BuildingPendulumRobot extends Robot
    public double getPendulumAngle(RobotSide activeSide)
    {
       PinJoint joint = joints.get(activeSide);
-      return joint.getQ().getDoubleValue();
+      return joint.getQYoVariable().getDoubleValue();
    }
 
    public void setPendulumAngle(RobotSide activeSide, double q)
@@ -99,7 +99,7 @@ public class BuildingPendulumRobot extends Robot
    public double getPendulumVelocity(RobotSide activeSide)
    {
       PinJoint joint = joints.get(activeSide);
-       return joint.getQD().getDoubleValue();
+       return joint.getQDYoVariable().getDoubleValue();
    }
    public double getSwitchAngle(RobotSide activeSide)
    {

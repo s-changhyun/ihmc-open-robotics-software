@@ -9,22 +9,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import net.java.games.input.Event;
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickComponentFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -56,7 +56,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private QuadrupedTeleopMode activeTeleopMode;
 
    public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device,
-         SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedPhysicalProperties physicalProperties) throws IOException
+         FullQuadrupedRobotModel fullRobotModel, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
       this.device = device;
 

@@ -10,17 +10,17 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class YoEntryBoxTest
 {
    public enum BadGreekEnum {ALPHA, BETA, GAMMA}
@@ -125,7 +125,7 @@ public class YoEntryBoxTest
 
    // GT - these values are twice the minimum working values for Trogdor.
    // This test is for humans to view
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -139,7 +139,7 @@ public class YoEntryBoxTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 7.4)
+	@ContinuousIntegrationTest(estimatedDuration = 7.4)
 	@Test(timeout = 37000)
    public void testSwitchToEnumEntry() throws SimulationExceededMaximumTimeException, InterruptedException
    {

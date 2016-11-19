@@ -8,20 +8,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class SpringFlamingoSimulationTest
 {
    private SimulationGUITestFixture testFixture;
@@ -46,7 +46,7 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.5)
+	@ContinuousIntegrationTest(estimatedDuration = 8.5)
 	@Test(timeout = 42000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
@@ -117,7 +117,7 @@ public class SpringFlamingoSimulationTest
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 3.6)
+	@ContinuousIntegrationTest(estimatedDuration = 3.6)
 	@Test(timeout = 30000)
 	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{

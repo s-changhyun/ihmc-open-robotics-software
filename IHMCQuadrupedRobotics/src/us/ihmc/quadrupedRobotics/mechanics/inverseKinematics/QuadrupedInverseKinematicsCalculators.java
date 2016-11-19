@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -17,22 +18,19 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInverseKinematicsCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame rootJointFrame, bodyFrame;
-   private final OneDoFJoint[] oneDoFJoints;
+   protected final OneDoFJoint[] oneDoFJoints;
    private final QuadrantDependentList<QuadrantHolder> quadrantHolders = new QuadrantDependentList<QuadrantHolder>();
    private final double[] jointAnglesToPack = new double[3];
 
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
 
    public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-         SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+         FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
 
@@ -64,7 +62,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
    @Override
    public boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3d footPositionInFrameBeforeHipRoll,
-         SDFFullRobotModel fullRobotModel)
+         FullRobotModel fullRobotModel)
    {
       QuadrantHolder quadrantHolder = quadrantHolders.get(robotQuadrant);
       boolean validSolution = quadrantHolder.solveGivenFootLocationInHip(footPositionInFrameBeforeHipRoll, jointAnglesToPack);
@@ -95,14 +93,6 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       quadrantHolders.get(robotQuadrant).setDesiredLegAnglesInFullRobotModel(jointAnglesToPack);
    }
 
-   public void updateSimulationBasedOnFullRobotModel(FloatingRootJointRobot sdfRobot)
-   {
-      for (OneDoFJoint joint : oneDoFJoints)
-      {
-         OneDegreeOfFreedomJoint simulatedJoint = (OneDegreeOfFreedomJoint) sdfRobot.getJoint(joint.getName());
-         simulatedJoint.setQ(joint.getqDesired());
-      }
-   }
 
    private class QuadrantHolder
    {
@@ -112,14 +102,14 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
       private final QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator closedFormInverseKinematicsCalculator;
 
-      private final SDFFullRobotModel fullRobotModel;
+      private final FullRobotModel fullRobotModel;
       private final ArrayList<OneDoFJoint> jointsToControl = new ArrayList<OneDoFJoint>();
       private TranslationReferenceFrame desiredFrame;
 
       private final QuadrupedReferenceFrames referenceFrames;
 
       public QuadrantHolder(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-            QuadrupedReferenceFrames referenceFrames, SDFFullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+            QuadrupedReferenceFrames referenceFrames, FullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
          this.referenceFrames = referenceFrames;
 

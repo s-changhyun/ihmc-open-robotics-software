@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 
 public class SimpleDoNothingBehavior extends AbstractBehavior
 {
-   public SimpleDoNothingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public SimpleDoNothingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
@@ -13,61 +13,12 @@ public class SimpleDoNothingBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-
-   }
-
-   @Override
-   public void initialize()
-   {
-      defaultInitialize();
-   }
-
-   @Override
-   public void doPostBehaviorCleanup()
-   {
-      defaultPostBehaviorCleanup();
-   }
-
-   @Override
-   public void stop()
-   {
-      defaultStop();
-   }
-
-   @Override
-   public void pause()
-   {
-      defaultPause();
    }
 
    @Override
    public boolean isDone()
    {
-      return defaultIsDone();
-   }
-
-   @Override
-   public void enableActions()
-   {
-
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-
+      return false;
    }
 
    public boolean hasInputBeenSet()

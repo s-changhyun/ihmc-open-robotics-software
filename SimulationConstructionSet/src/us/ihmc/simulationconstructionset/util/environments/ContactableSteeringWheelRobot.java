@@ -7,11 +7,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -237,14 +237,14 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
       yoGraphicsListRegistries.add(graphListRegistry);
 
-      steeringWheelPinJoint.getQ().addVariableChangedListener(new VariableChangedListener()
+      steeringWheelPinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
       {
 
          @Override
          public void variableChanged(YoVariable<?> v)
          {
             double rangeOfMotion = 2 * Math.PI * totalNumberOfPossibleTurns;
-            steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQ().getDoubleValue()) / (0.5 * rangeOfMotion)) * 100);
+            steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQYoVariable().getDoubleValue()) / (0.5 * rangeOfMotion)) * 100);
          }
       });
    }
@@ -254,7 +254,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    {
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newPose = new RigidBodyTransform();
-      pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQ().getDoubleValue());
+      pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQYoVariable().getDoubleValue());
       newPose.multiply(originalSteeringWheelPose, pinJointTransform);
       steeringWheelFrame.setPoseAndUpdate(newPose);
 

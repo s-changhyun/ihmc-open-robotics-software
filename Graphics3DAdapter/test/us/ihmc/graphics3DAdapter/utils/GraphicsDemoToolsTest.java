@@ -9,17 +9,17 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class GraphicsDemoToolsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testCreatePointCloud()
    {

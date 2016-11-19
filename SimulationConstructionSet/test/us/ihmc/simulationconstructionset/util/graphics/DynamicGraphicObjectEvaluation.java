@@ -3,19 +3,19 @@ package us.ihmc.simulationconstructionset.util.graphics;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicShape;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicText3D;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicShape;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicText3D;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -28,11 +28,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class DynamicGraphicObjectEvaluation
 {
    public static void main(String[] args)
-   {      
+   {
       Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3DAdapter();
       evaluate(jmeGraphics3dAdapter);
    }
-   
+
 
 
    public static void evaluate(Graphics3DAdapter graphicsAdapter)
@@ -41,7 +41,7 @@ public class DynamicGraphicObjectEvaluation
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(100);
-      
+
       final SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, parameters);
       scs.setDT(0.1, 1);
 
@@ -112,7 +112,7 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicsList.add(dynamicGraphicBoxGhost);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-      
+
       yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicPolygon);
       yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicYoFramePolygon);
 
@@ -147,15 +147,15 @@ public class DynamicGraphicObjectEvaluation
                ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
                dynamicGraphicYoFramePolygon.update();
-               
+
                Vector3d eulerAngles = new Vector3d();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
                eulerAngles.setY(eulerAngles.getY() + 0.1);
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);
-               
+
                dynamicGraphicText.setText("Hello");
                dynamicGraphicText.update();
-               
+
                scs.tickAndUpdate();
 
                quickPause();
@@ -168,7 +168,7 @@ public class DynamicGraphicObjectEvaluation
 
                dynamicGraphicText.setText("GoodBye");
                dynamicGraphicText.update();
-               
+
                scs.tickAndUpdate();
 
             }

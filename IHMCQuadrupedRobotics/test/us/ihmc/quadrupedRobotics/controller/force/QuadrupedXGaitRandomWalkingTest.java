@@ -13,14 +13,15 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -32,6 +33,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    {
       try
       {
+         ParameterRegistry.destroyAndRecreateInstance();
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -57,7 +59,8 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
 
    private double randomValidVelocity(Random random)
    {
-      return random.nextDouble() * 2.0 - 1.0;
+      double velocity = random.nextDouble() * 2.0 - 1.0;
+      return velocity * 0.8;
    }
 
    private double randomValidYawRate(Random random)
@@ -70,11 +73,11 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       return random.nextDouble() * 2.0 + 0.25;
    }
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
    @Test(timeout = 500000)
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 
@@ -94,11 +97,11 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 500000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 
@@ -125,11 +128,11 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 75.0)
+   @ContinuousIntegrationTest(estimatedDuration = 75.0)
    @Test(timeout = 600000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 
@@ -157,11 +160,11 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 600000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 

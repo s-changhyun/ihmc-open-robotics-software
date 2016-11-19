@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
@@ -11,7 +11,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    private final BooleanYoVariable packetAvailable = new BooleanYoVariable("packetAvailable" + behaviorName, registry);
    private ObjectWeightPacket objectWeightPacket;
    
-   public ObjectWeightBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public ObjectWeightBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
@@ -38,41 +38,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
       hasInputBeenSet.set(true);
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      
-   }
 
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      
-   }
-
-   @Override
-   public void stop()
-   {
-      defaultStop();
-   }
-
-   @Override
-   public void enableActions()
-   {
-      
-   }
-
-   @Override
-   public void pause()
-   {
-      defaultPause();
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
-   }
 
    @Override
    public boolean isDone()
@@ -83,19 +49,18 @@ public class ObjectWeightBehavior extends AbstractBehavior
    @Override
    public void doPostBehaviorCleanup()
    {
-      defaultPostBehaviorCleanup();
+      super.doPostBehaviorCleanup();
       hasInputBeenSet.set(false);
    }
 
    @Override
    public void initialize()
    {
-      defaultInitialize();
+      super.initialize();
       hasInputBeenSet.set(false);
       packetAvailable.set(false);
    }
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

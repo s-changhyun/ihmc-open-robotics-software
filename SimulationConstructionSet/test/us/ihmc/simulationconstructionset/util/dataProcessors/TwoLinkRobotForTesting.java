@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.util.dataProcessors;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -102,19 +102,19 @@ public class TwoLinkRobotForTesting extends Robot
 
    public double getElbowAngle()
    {
-      return elbowJoint.getQ().getDoubleValue();
+      return elbowJoint.getQYoVariable().getDoubleValue();
    }
 
  
    public double getElbowVelocity()
    {
-      return elbowJoint.getQD().getDoubleValue();
+      return elbowJoint.getQDYoVariable().getDoubleValue();
    }
 
  
    public double getElbowTorque()
    {
-      return elbowJoint.getTau().getDoubleValue();
+      return elbowJoint.getTauYoVariable().getDoubleValue();
    }
 
  
@@ -125,32 +125,32 @@ public class TwoLinkRobotForTesting extends Robot
    
    public void setElbowPosition(double value)
    {
-      elbowJoint.q.set(value);
+      elbowJoint.setQ(value);
    }
 
    public void setUpperPosition(double value)
    {
-      upperJoint.q.set(value);
+      upperJoint.setQ(value);
    }
    
    public void setElbowVelocity(double velocity)
    {
-      elbowJoint.qd.set(velocity);
+      elbowJoint.setQd(velocity);
    }
 
    public void setUpperVelocity(double velocity)
    {
-      upperJoint.qd.set(velocity);
+      upperJoint.setQd(velocity);
    }
 
    public void setElbowAcceleration(double value)
    {
-      elbowJoint.qdd.set(value);
+      elbowJoint.setQdd(value);
    }
 
    public void setUpperAcceleration(double value)
    {
-      upperJoint.qdd.set(value);
+      upperJoint.setQdd(value);
    }
 
    private Link lowerArm()

@@ -12,15 +12,16 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -31,6 +32,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      ParameterRegistry.destroyAndRecreateInstance();
    }
    
    @After
@@ -42,7 +44,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 120000)
    public void testWalkingOverShallowBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -56,7 +58,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(1.0);
@@ -68,7 +70,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 120000)
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -82,7 +84,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.5);
@@ -96,7 +98,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    }
    
    
-   @DeployableTestMethod(estimatedDuration = 25.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 25.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
    @Test(timeout = 120000)
    public void testWalkingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -111,7 +113,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getYoComPositionInputZ().set(0.6);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
@@ -126,6 +128,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       variables.getXGaitStepGroundClearanceInput().set(0.2);
       variables.getYoPlanarVelocityInputX().set(0.5);
       variables.getYoPlanarVelocityInputZ().set(0.0);
+      conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.0));
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
       conductor.simulate();

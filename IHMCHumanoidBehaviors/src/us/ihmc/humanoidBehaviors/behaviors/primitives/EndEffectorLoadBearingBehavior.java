@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
@@ -10,9 +10,13 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private EndEffectorLoadBearingMessage outgoingEndEffectorLoadBearingMessage;
 
-   public EndEffectorLoadBearingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EndEffectorLoadBearingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
+   }
+   public EndEffectorLoadBearingBehavior(String prefix, CommunicationBridgeInterface outgoingCommunicationBridge)
+   {
+      super(prefix,outgoingCommunicationBridge);
    }
 
    public void setInput(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
@@ -31,17 +35,13 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
 
    private void sendFootStateToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
       {
          sendPacketToController(outgoingEndEffectorLoadBearingMessage);
          packetHasBeenSent.set(true);
       }
    }
 
-   @Override
-   public void initialize()
-   {
-   }
 
    @Override
    public void doPostBehaviorCleanup()
@@ -50,26 +50,9 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
       outgoingEndEffectorLoadBearingMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -77,20 +60,7 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
       return packetHasBeenSent.getBooleanValue() &&!isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
+   
    
    public boolean hasInputBeenSet() {
 	   if (outgoingEndEffectorLoadBearingMessage != null)

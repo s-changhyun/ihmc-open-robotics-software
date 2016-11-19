@@ -10,18 +10,18 @@ import java.util.logging.Logger;
 
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTaskExecutor;
 import us.ihmc.wholeBodyController.diagnostics.utils.WaitDiagnosticTask;

@@ -3,8 +3,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -179,27 +179,27 @@ public class Step2Robot extends Robot {
 
 	// ************************* Part 1
 	public void setKneeForce(double desiredTauKnee) {
-		this.kneeJoint.tau.set(desiredTauKnee);
+		this.kneeJoint.setTau(desiredTauKnee);
 	}
 
 	public double getBodyPositionZ() {
-		return bodyJoint1.q.getDoubleValue();
+		return bodyJoint1.getQ();
 	}
 
 	public double getBodyVelocityZ() {
-		return bodyJoint1.qd.getDoubleValue();
+		return bodyJoint1.getQD();
 	}
 
 	// ************************* Part 2
 	public double getBodyPitch() {
-		return bodyJoint2.q.getDoubleValue();
+		return bodyJoint2.getQ();
 	}
 
 	public void setHipForce(double desiredTauHip) {
-		this.hipJoint.tau.set(desiredTauHip); //TODO we CANNOT use bodyJoint2 here because that joint cannot be actuated
+		this.hipJoint.setTau(desiredTauHip); //TODO we CANNOT use bodyJoint2 here because that joint cannot be actuated
 	}
 
 	public double getBodyPitchVel() {
-		return bodyJoint2.qd.getDoubleValue();
+		return bodyJoint2.getQD();
 	}
 }

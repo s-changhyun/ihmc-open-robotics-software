@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,12 +18,12 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
 
-   public HeadTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HeadTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
    
-   public HeadTrajectoryBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HeadTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
       
@@ -52,10 +52,10 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
 
    private void sendHeadOrientationPacketToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
       {
          outgoingHeadTrajectoryMessage.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingHeadTrajectoryMessage);
+         sendPacket(outgoingHeadTrajectoryMessage);
          sendPacketToController(outgoingHeadTrajectoryMessage);
          
          packetHasBeenSent.set(true);
@@ -70,7 +70,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       hasBeenInitialized.set(true);
    }
@@ -82,28 +82,11 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       outgoingHeadTrajectoryMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       trajectoryTime.set(Double.NaN);      
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -113,20 +96,8 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+   
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
    
    public boolean hasInputBeenSet() {
 	   if (outgoingHeadTrajectoryMessage != null)

@@ -4,15 +4,15 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHighLevelStateBehaviorTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.behaviorTests.DRCHighLevelStateBehaviorTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,7 +35,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 26.3)
+   @ContinuousIntegrationTest(estimatedDuration = 26.3)
    @Test(timeout = 130000)
    public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
@@ -43,7 +43,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 33.0)
+   @ContinuousIntegrationTest(estimatedDuration = 33.0)
    @Test(timeout = 160000)
    public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
    {
@@ -51,7 +51,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0, targets = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
    {

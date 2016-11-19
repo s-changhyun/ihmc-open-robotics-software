@@ -3,8 +3,8 @@ package us.ihmc.atlas;
 import java.io.File;
 import java.io.PrintWriter;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class DRCRobotModelFileInvestigator
 {
@@ -17,7 +17,7 @@ public class DRCRobotModelFileInvestigator
 
          PrintWriter printWriter = new PrintWriter(file);
 
-         final FloatingRootJointRobot robot = model.createSdfRobot(false);
+         final FloatingRootJointRobot robot = model.createHumanoidFloatingRootJointRobot(false);
 
          printWriter.println(robot);
          printWriter.close();

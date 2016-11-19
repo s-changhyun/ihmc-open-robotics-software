@@ -1,8 +1,9 @@
 package us.ihmc.tools.search.strings.fuzzySearch.comparators;
 
 import org.junit.Test;
+
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -13,7 +14,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCompare()
    {
@@ -24,10 +25,10 @@ public class SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest
          int secondRandomDistance = random.nextInt(300) + 1;
 
          CombinedFuzzySearchResult aardvark = new CombinedFuzzySearchResult("Aardvark", CombinedFuzzySearchResult.CombinedFuzzySearchResultType.FUZZY,
-               firstRandomDistance, null);
+               firstRandomDistance);
 
          CombinedFuzzySearchResult sebastopol = new CombinedFuzzySearchResult("Sebastopol", CombinedFuzzySearchResult.CombinedFuzzySearchResultType.FUZZY,
-               secondRandomDistance, null);
+               secondRandomDistance);
 
          SortFuzzyMatchesDescendingByFuzzyDistanceComparator comparator = new SortFuzzyMatchesDescendingByFuzzyDistanceComparator();
 
