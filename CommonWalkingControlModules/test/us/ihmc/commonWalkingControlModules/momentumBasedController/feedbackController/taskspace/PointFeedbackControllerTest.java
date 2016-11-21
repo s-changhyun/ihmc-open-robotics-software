@@ -103,7 +103,7 @@ public class PointFeedbackControllerTest
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
-            jointIndexHandler, registry);
+            jointIndexHandler, controlDT, registry);
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
@@ -199,7 +199,7 @@ public class PointFeedbackControllerTest
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
-            jointIndexHandler, registry);
+            jointIndexHandler, controlDT, registry);
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromJerryQP = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromQPOASES = new DenseMatrix64F(numberOfDoFs, 1);

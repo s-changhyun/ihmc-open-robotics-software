@@ -41,6 +41,7 @@ public class MotionQPInputCalculatorTest
    public void testPointAccelerationCommandsWithChainRobot() throws Exception
    {
       Random random = new Random(5641654L);
+      double controlDT = 0.002;
 
       for (int iteration = 0; iteration < 100; iteration++)
       {
@@ -71,7 +72,7 @@ public class MotionQPInputCalculatorTest
          joints.toArray(jointsToOptimizeFor);
          JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
 
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
 
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.set(elevator, endEffector);
@@ -105,6 +106,7 @@ public class MotionQPInputCalculatorTest
    public void testPointAccelerationCommandsWithFloatingChainRobot() throws Exception
    {
       Random random = new Random(5641654L);
+      double controlDT = 0.002;
 
       for (int iteration = 0; iteration < 100; iteration++)
       {
@@ -134,7 +136,7 @@ public class MotionQPInputCalculatorTest
          InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
          JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
 
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
 
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.set(elevator, endEffector);

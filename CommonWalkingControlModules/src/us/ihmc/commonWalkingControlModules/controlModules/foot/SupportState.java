@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -144,6 +145,15 @@ public class SupportState extends AbstractFootControlState
          timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
       }
 
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
+      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
+
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = fullRobotModel.getFoot(robotSide);
+      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
@@ -156,14 +166,6 @@ public class SupportState extends AbstractFootControlState
       super.doTransitionIntoAction();
       FrameVector fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
-
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;

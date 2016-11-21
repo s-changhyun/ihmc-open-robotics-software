@@ -75,7 +75,7 @@ public class MotionQPInputCalculator
    private final int numberOfDoFs;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         JointIndexHandler jointIndexHandler, YoVariableRegistry parentRegistry)
+         JointIndexHandler jointIndexHandler, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.jointIndexHandler = jointIndexHandler;
@@ -83,7 +83,7 @@ public class MotionQPInputCalculator
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
-      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, registry);
+      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, controlDT, registry);
 
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
@@ -104,6 +104,7 @@ public class MotionQPInputCalculator
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
+      privilegedConfigurationHandler.updatePrivilegedConfigurations();
    }
 
    public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
