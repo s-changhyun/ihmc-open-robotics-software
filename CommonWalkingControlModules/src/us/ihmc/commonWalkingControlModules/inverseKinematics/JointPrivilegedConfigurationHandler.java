@@ -119,7 +119,10 @@ public class JointPrivilegedConfigurationHandler
       chainEndEffectors.clear();
    }
 
-   public void updatePrivilegedConfigurations()
+   /**
+    * Updates the privileged configurations according to a rate limited yo variable, to keep them from changing too quickly.
+    */
+   private void updatePrivilegedConfigurations()
    {
       for (int i = 0; i < numberOfDoFs; i++)
       {
@@ -136,6 +139,7 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointVelocities()
    {
+      //updatePrivilegedConfigurations();
       processPrivilegedConfigurationCommands();
 
       for (int i = 0; i < numberOfDoFs; i++)
@@ -154,6 +158,7 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointAccelerations()
    {
+      //updatePrivilegedConfigurations();
       processPrivilegedConfigurationCommands();
 
       for (int i = 0; i < numberOfDoFs; i++)
@@ -263,7 +268,7 @@ public class JointPrivilegedConfigurationHandler
             RigidBody base = command.getChainBase(chainIndex);
             RigidBody endEffector = command.getChainEndEffector(chainIndex);
 
-            if (!chainBases.contains(base) && !chainEndEffectors.contains(endEffector))
+            if (!chainBases.contains(base) || !chainEndEffectors.contains(endEffector))
             {
                chainBases.add(command.getChainBase(chainIndex));
                chainEndEffectors.add(command.getChainEndEffector(chainIndex));

@@ -104,7 +104,6 @@ public class MotionQPInputCalculator
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
-      privilegedConfigurationHandler.updatePrivilegedConfigurations();
    }
 
    public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
