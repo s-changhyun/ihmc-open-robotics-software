@@ -19,7 +19,11 @@ import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
+/**
+ * This class computes the input for the optimization based on the desired privileged configuration commands.
+ */
 public class JointPrivilegedConfigurationHandler
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -51,6 +55,9 @@ public class JointPrivilegedConfigurationHandler
    private final List<RigidBody> chainEndEffectors = new ArrayList<>();
 
    private final int numberOfDoFs;
+
+   private final ArrayList<PrivilegedConfigurationCommand> commandList = new ArrayList<>();
+   private final ArrayList<OneDoFJoint> jointsWithConfiguration = new ArrayList<>();
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, double controlDT, YoVariableRegistry parentRegistry)
@@ -103,6 +110,9 @@ public class JointPrivilegedConfigurationHandler
       parentRegistry.addChild(registry);
    }
 
+   /**
+    * Clears the information on the kinematic chains. These are used to compute the necessary Jacobians to project into the null space.
+    */
    public void reset()
    {
       chainBases.clear();
@@ -120,8 +130,14 @@ public class JointPrivilegedConfigurationHandler
       }
    }
 
+   /**
+    * Computes the desired joint velocity to be submitted to the inverse kinematics control core to achieve the desired privileged configuration.
+    * Uses a simple proportional controller with saturation limits based on the position error.
+    */
    public void computePrivilegedJointVelocities()
    {
+      processPrivilegedConfigurationCommands();
+
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
@@ -132,8 +148,14 @@ public class JointPrivilegedConfigurationHandler
       }
    }
 
+   /**
+    * Computes the desired joint accelerations to be submitted to the inverse dynamics control core to achieve the desired privileged configuration.
+    * Uses a simple PD controller with saturation limits based on the position error.
+    */
    public void computePrivilegedJointAccelerations()
    {
+      processPrivilegedConfigurationCommands();
+
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
@@ -145,8 +167,17 @@ public class JointPrivilegedConfigurationHandler
       }
    }
 
+   /**
+    * Adds a privileged configuration command to be processed later.
+    * Note that any weight, configuration gain, velocity gain, max velocity, and max acceleration, will be overwritten by the last one added.
+    * Additionally, the last default configuration will be the one used.
+    * The same is applicable for different requested privileged configurations.
+    * @param command command to add to list
+    */
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
+      commandList.add(command);
+
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
 
       if (command.hasNewWeight())
@@ -160,40 +191,88 @@ public class JointPrivilegedConfigurationHandler
       if (command.hasNewMaxAcceleration())
          maxAcceleration.set(command.getMaxAcceleration());
 
-      if (command.hasNewPrivilegedConfigurationDefaultOption())
+   }
+
+   private void processPrivilegedConfigurationCommands()
+   {
+      processDefaultPrivilegedConfigurationOptions();
+      processPrivilegedConfigurations();
+
+      commandList.clear();
+      jointsWithConfiguration.clear();
+   }
+
+   private void processDefaultPrivilegedConfigurationOptions()
+   {
+      for (int i = 0; i < commandList.size(); i++)
       {
-         PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
-         for (int i = 0; i < numberOfDoFs; i++)
-            setPrivilegedConfigurationFromOption(defaultOption, i);
-      }
+         PrivilegedConfigurationCommand command = commandList.get(i);
 
-      for (int i = 0; i < command.getNumberOfJoints(); i++)
-      {
-         OneDoFJoint joint = command.getJoint(i);
-         MutableInt mutableIndex = jointIndices.get(joint);
-         if (mutableIndex == null)
-        	 continue;
-
-         int jointIndex = mutableIndex.intValue();
-
-         if (command.hasNewPrivilegedConfiguration(i))
+         if (command.hasNewPrivilegedConfigurationDefaultOption())
          {
-            double qPrivileged = command.getPrivilegedConfiguration(i);
-            privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-            yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
-         }
-
-         if (command.hasNewPrivilegedConfigurationOption(i))
-         {
-            PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(i);
-            setPrivilegedConfigurationFromOption(option, jointIndex);
+            PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
+            for (int j = 0; j < numberOfDoFs; j++)
+               setPrivilegedConfigurationFromOption(defaultOption, j);
          }
       }
+   }
 
-      for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
+   private void processPrivilegedConfigurations()
+   {
+      for (int i = 0; i < commandList.size(); i++)
       {
-         chainBases.add(command.getChainBase(chainIndex));
-         chainEndEffectors.add(command.getChainEndEffector(chainIndex));
+         PrivilegedConfigurationCommand command = commandList.get(i);
+
+         for (int j = 0; j < command.getNumberOfJoints(); j++)
+         {
+            OneDoFJoint joint = command.getJoint(j);
+            MutableInt mutableIndex = jointIndices.get(joint);
+            if (mutableIndex == null)
+               continue;
+
+            int jointIndex = mutableIndex.intValue();
+
+            if (command.hasNewPrivilegedConfiguration(j))
+            {
+               OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
+               double qPrivileged = command.getPrivilegedConfiguration(j);
+               privilegedConfigurations.set(jointIndex, 0, qPrivileged);
+               yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
+
+               if (!jointsWithConfiguration.contains(configuredJoint))
+                  jointsWithConfiguration.add(configuredJoint);
+               else
+                  PrintTools.warn(this, "Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
+            }
+
+            if (command.hasNewPrivilegedConfigurationOption(j))
+            {
+               OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
+               PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(j);
+               setPrivilegedConfigurationFromOption(option, jointIndex);
+
+               if (!jointsWithConfiguration.contains(configuredJoint))
+                  jointsWithConfiguration.add(configuredJoint);
+               else
+                  PrintTools.warn(this, "Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
+            }
+         }
+
+         for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
+         {
+            RigidBody base = command.getChainBase(chainIndex);
+            RigidBody endEffector = command.getChainEndEffector(chainIndex);
+
+            if (!chainBases.contains(base) && !chainEndEffectors.contains(endEffector))
+            {
+               chainBases.add(command.getChainBase(chainIndex));
+               chainEndEffectors.add(command.getChainEndEffector(chainIndex));
+            }
+            else
+            {
+               PrintTools.warn(this, "Privileged configuration already received for chain " + base.getName() + " to " + endEffector.getName() + ".");
+            }
+         }
       }
    }
 
@@ -225,16 +304,26 @@ public class JointPrivilegedConfigurationHandler
       return isJointPrivilegedConfigurationEnabled.getBooleanValue();
    }
 
+   /**
+    * @return matrix of privileged joint velocities to be submitted to the inverse kinematics controller core.
+    */
    public DenseMatrix64F getPrivilegedJointVelocities()
    {
       return privilegedVelocities;
    }
 
+   /**
+    * @return matrix of privileged joint accelerations to be submitted ot the inverse dynamics controller core.
+    */
    public DenseMatrix64F getPrivilegedJointAccelerations()
    {
       return privilegedAccelerations;
    }
 
+   /**
+    * @param joint one DoF joint in question
+    * @return desired privileged joint acceleration
+    */
    public double getPrivilegedJointAcceleration(OneDoFJoint joint)
    {
       return privilegedAccelerations.get(jointIndices.get(joint).intValue(), 0);
@@ -245,26 +334,47 @@ public class JointPrivilegedConfigurationHandler
       return selectionMatrix;
    }
 
+   /**
+    * @return one DoF joints to be considered by for the privileged configuration command.
+    */
    public OneDoFJoint[] getJoints()
    {
       return oneDoFJoints;
    }
 
+   /**
+    * This weight is the respective priority placed on the privileged command in the optimization.
+    * @return weight for the privileged command in the optimization.
+    */
    public double getWeight()
    {
       return weight.getDoubleValue();
    }
 
+   /**
+    * Returns the number of kinematic chains that contain privileged configurations.
+    * @return number of kinematic chains
+    */
    public int getNumberOfChains()
    {
       return chainBases.size();
    }
 
+   /**
+    * Returns the base of the current kinematic chain to compute the Jacobian.
+    * @param chainIndex the current chain number
+    * @return base body of the current kinematic chain.
+    */
    public RigidBody getChainBase(int chainIndex)
    {
       return chainBases.get(chainIndex);
    }
 
+   /**
+    * Returns the end effectors of the current kinematic chain to compute the Jacobian.
+    * @param chainIndex the current chain number.
+    * @return end effector body of the current kinematic chain.
+    */
    public RigidBody getChainEndEffector(int chainIndex)
    {
       return chainEndEffectors.get(chainIndex);
