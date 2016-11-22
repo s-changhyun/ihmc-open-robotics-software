@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -25,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -48,10 +50,10 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
-//   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>();
-   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
-//   private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>();
-   private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>();
+   //   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(10);
+   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
+   //   private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(10);
+   private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
    private final SideDependentList<FootstepStatus> latestFootstepStatus;
    private final SideDependentList<EnumYoVariable<FootstepStatus.Status>> latestFootstepStatusEnum;
@@ -81,8 +83,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
    private final Timer footstepSentTimer = new Timer();
 
-   public FollowFiducialBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
+   public FollowFiducialBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+         HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
    {
       super(FollowFiducialBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
@@ -116,16 +118,17 @@ public class FollowFiducialBehavior extends AbstractBehavior
       YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
-
       latestFootstepStatus = new SideDependentList<>();
 
-      EnumYoVariable<FootstepStatus.Status> leftFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("leftFootstepStatus", registry, FootstepStatus.Status.class);
-      EnumYoVariable<FootstepStatus.Status> rightFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("rightFootstepStatus", registry, FootstepStatus.Status.class);
+      EnumYoVariable<FootstepStatus.Status> leftFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("leftFootstepStatus", registry,
+            FootstepStatus.Status.class);
+      EnumYoVariable<FootstepStatus.Status> rightFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("rightFootstepStatus", registry,
+            FootstepStatus.Status.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
-//      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
+      //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
-//      behaviorCommunicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
+      //      behaviorCommunicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       behaviorCommunicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
    }
 
@@ -139,7 +142,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
 
-      double idealFootstepLength = 0.25;
+      double idealFootstepLength = 0.4;
       double idealFootstepWidth = 0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
@@ -235,29 +238,29 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private void sendTextToSpeechPacket(String message)
    {
       TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
+      textToSpeechPacket.setbeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
 
    private void pitchHeadToFindFiducial()
    {
-//      headPitchToFindFucdicial.mul(-1.0);
-//      AxisAngle4d axisAngleOrientation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), headPitchToFindFucdicial.getDoubleValue());
-//
-//      Quat4d headOrientation = new Quat4d();
-//      headOrientation.set(axisAngleOrientation);
-//      sendHeadTrajectoryMessage(1.0, headOrientation);
+      //      headPitchToFindFucdicial.mul(-1.0);
+      //      AxisAngle4d axisAngleOrientation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), headPitchToFindFucdicial.getDoubleValue());
+      //
+      //      Quat4d headOrientation = new Quat4d();
+      //      headOrientation.set(axisAngleOrientation);
+      //      sendHeadTrajectoryMessage(1.0, headOrientation);
    }
 
    private void pitchHeadToCenterFiducial()
    {
-//      headPitchToCenterFucdicial.set(0.0);
-//      AxisAngle4d axisAngleOrientation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), headPitchToCenterFucdicial.getDoubleValue());
-//
-//      Quat4d headOrientation = new Quat4d();
-//      headOrientation.set(axisAngleOrientation);
-//      sendHeadTrajectoryMessage(1.0, headOrientation);
+      //      headPitchToCenterFucdicial.set(0.0);
+      //      AxisAngle4d axisAngleOrientation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), headPitchToCenterFucdicial.getDoubleValue());
+      //
+      //      Quat4d headOrientation = new Quat4d();
+      //      headOrientation.set(axisAngleOrientation);
+      //      sendHeadTrajectoryMessage(1.0, headOrientation);
    }
-
 
    private void sendHeadTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
    {
@@ -268,7 +271,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER);
       sendPacketToController(headTrajectoryMessage);
-//      footstepSentTimer.reset();
+      //      footstepSentTimer.reset();
    }
 
    private void checkFootstepStatusAndDetermineSwingingFoot()
@@ -337,6 +340,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void setGoalAndInitialStanceFootToBeClosestToGoal(FramePose goalPose)
    {
+
+      sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
       leftFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.LEFT));
       rightFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.RIGHT));
       leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -361,7 +366,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       if (vectorFromFeetToGoal.length() > shorterGoalLength)
       {
-         vectorFromFeetToGoal.scale(shorterGoalLength/vectorFromFeetToGoal.length());
+         vectorFromFeetToGoal.scale(shorterGoalLength / vectorFromFeetToGoal.length());
       }
       shorterGoalPosition.set(pointBetweenFeet);
       shorterGoalPosition.add(vectorFromFeetToGoal);
@@ -396,7 +401,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
          }
       }
 
-//      sendTextToSpeechPacket("Planning footsteps from " + tempStanceFootPose + " to " + goalPose);
+      //      sendTextToSpeechPacket("Planning footsteps from " + tempStanceFootPose + " to " + goalPose);
       sendTextToSpeechPacket("Planning footsteps to the fiducial");
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
       footstepPlanner.setGoal(footstepPlannerGoal);
@@ -430,9 +435,12 @@ public class FollowFiducialBehavior extends AbstractBehavior
          tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
          tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
 
-//         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
+         //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 
-         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition), new Quat4d(tempFirstFootstepPoseOrientation));
+         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition),
+               new Quat4d(tempFirstFootstepPoseOrientation));
+         firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+
          footstepDataListMessage.add(firstFootstepMessage);
       }
 
