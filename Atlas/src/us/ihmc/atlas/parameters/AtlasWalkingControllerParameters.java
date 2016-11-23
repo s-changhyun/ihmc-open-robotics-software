@@ -124,7 +124,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMinStepLengthForToeOff()
    {
-      return getFootLength();
+      //return getFootLength();
+      return runningOnRealRobot ? getFootLength() : 0.0;
    }
 
    /** {@inheritDoc} */
@@ -132,6 +133,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public boolean doToeOffWhenHittingAnkleLimit()
    {
       return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getAnkleLowerLimitToTriggerToeOff()
+   {
+      return -0.7;
    }
 
    /** {@inheritDoc} */

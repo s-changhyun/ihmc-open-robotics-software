@@ -3,11 +3,15 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -18,7 +22,9 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
@@ -28,6 +34,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 {
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
+
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final ReferenceFrame footFrame;
 
@@ -71,6 +79,13 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
       isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedFootTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
+
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = fullRobotModel.getFoot(robotSide);
+
+      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
+      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    public void holdCurrentPosition()
@@ -294,5 +309,11 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    public boolean isDone()
    {
       return true;
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return privilegedConfigurationCommand;
    }
 }

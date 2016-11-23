@@ -483,6 +483,7 @@ public class FootControlModule
    public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
    {
       onToesState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      swingState.setAttemptToStraightenLegs(attemptToStraightenLegs);
       /*
       if (holdPositionState != null)
          holdPositionState;

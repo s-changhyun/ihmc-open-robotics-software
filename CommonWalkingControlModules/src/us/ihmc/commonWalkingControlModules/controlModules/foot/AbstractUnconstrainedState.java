@@ -38,8 +38,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    protected boolean trajectoryWasReplanned;
 
@@ -56,8 +54,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
-
-   private boolean attemptToStraightenLegs = false;
 
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
          YoVariableRegistry registry)
@@ -88,17 +84,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       ankleFrame = contactableFoot.getFrameAfterParentJoint();
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-
-      straightLegsPrivilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      bentLegsPrivilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
@@ -218,12 +203,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;
-   }
-
-   @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return bentLegsPrivilegedConfigurationCommand;
    }
 
    @Override

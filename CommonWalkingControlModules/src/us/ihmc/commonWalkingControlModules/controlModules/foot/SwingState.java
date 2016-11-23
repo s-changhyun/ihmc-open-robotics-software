@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
@@ -11,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,6 +32,7 @@ import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajecto
 import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -51,6 +56,10 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable replanTrajectory;
    private final BooleanYoVariable doContinuousReplanning;
    private final YoVariableDoubleProvider swingTimeRemaining;
+
+   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final TwoWaypointPositionTrajectoryGenerator swingTrajectoryGenerator;
    private final CurrentConfigurationProvider stanceConfigurationProvider;
@@ -79,6 +88,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable isSwingSpeedUpEnabled;
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable currentTimeWithSwingSpeedUp;
+   private final DoubleYoVariable percentOfSwingToStraightenLeg;
+   private final BooleanYoVariable hasSwitchedToStraightLegs;
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameOrientation initialOrientation = new FrameOrientation();
@@ -100,6 +111,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameVector adjustmentVelocityCorrection;
    private final FramePoint unadjustedPosition = new FramePoint(worldFrame);
 
+   private boolean attemptToStraightenLegs = false;
+
    public SwingState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -118,6 +131,11 @@ public class SwingState extends AbstractUnconstrainedState
       velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
+
+      percentOfSwingToStraightenLeg = new DoubleYoVariable(namePrefix + "PercentOfSwingToStraightenLeg", registry);
+      percentOfSwingToStraightenLeg.set(footControlHelper.getWalkingControllerParameters().getPercentOfSwingToStraightenLeg());
+
+      hasSwitchedToStraightLegs = new BooleanYoVariable(namePrefix + "HasSwitchedToStraightLegs", registry);
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -192,6 +210,18 @@ public class SwingState extends AbstractUnconstrainedState
       currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = fullRobotModel.getFoot(robotSide);
+
+      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
+      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      //privilegedConfigurationCommand.set(bentLegsPrivilegedConfigurationCommand);
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -360,6 +390,8 @@ public class SwingState extends AbstractUnconstrainedState
          desiredLinearAcceleration.scale(speedUpFactorSquared);
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
+
+      updatePrivilegedConfiguration();
    }
 
    private final FramePose newFootstepPose = new FramePose();
@@ -431,6 +463,16 @@ public class SwingState extends AbstractUnconstrainedState
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
    }
 
+   private void updatePrivilegedConfiguration()
+   {
+      if (currentTime.getDoubleValue() > (percentOfSwingToStraightenLeg.getDoubleValue() * swingTimeProvider.getValue()) && attemptToStraightenLegs &&
+            !hasSwitchedToStraightLegs.getBooleanValue())
+      {
+         privilegedConfigurationCommand.set(straightLegsPrivilegedConfigurationCommand);
+         hasSwitchedToStraightLegs.set(true);
+      }
+   }
+
    /**
     * Request the swing trajectory to speed up using the given speed up factor.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
@@ -455,6 +497,16 @@ public class SwingState extends AbstractUnconstrainedState
       return swingTimeRemaining.getValue();
    }
 
+   /**
+    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
+    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
+    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
+    */
+   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
+   {
+      this.attemptToStraightenLegs = attemptToStraightenLegs;
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -463,6 +515,9 @@ public class SwingState extends AbstractUnconstrainedState
       maxSwingTimeSpeedUpFactor.set(Math.max(swingTimeProvider.getValue() / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
+
+      privilegedConfigurationCommand.set(bentLegsPrivilegedConfigurationCommand);
+      hasSwitchedToStraightLegs.set(false);
    }
 
    @Override
@@ -480,5 +535,11 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGenerator.informDone();
 
       adjustmentVelocityCorrection.setToZero();
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return privilegedConfigurationCommand;
    }
 }

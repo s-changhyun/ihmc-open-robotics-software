@@ -33,6 +33,7 @@ public class JointPrivilegedConfigurationHandler
    private final DoubleYoVariable configurationGain = new DoubleYoVariable("jointPrivilegedConfigurationGain", registry);
    private final DoubleYoVariable velocityGain = new DoubleYoVariable("jointPrivilegedVelocityGain", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationMaxVelocity", registry);
+   private final DoubleYoVariable maxSetpointRate = new DoubleYoVariable("jointPrivilegedConfigurationMaxSetpointRate", registry);
    private final DoubleYoVariable maxAcceleration = new DoubleYoVariable("jointPrivilegedConfigurationMaxAcceleration", registry);
 
    private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedConfigurations = new HashMap<>();
@@ -81,6 +82,7 @@ public class JointPrivilegedConfigurationHandler
       configurationGain.set(40.0);
       velocityGain.set(6.0);
       maxVelocity.set(2.0);
+      maxSetpointRate.set(10.0);
       maxAcceleration.set(Double.POSITIVE_INFINITY);
       weight.set(5.0);
 
@@ -102,7 +104,7 @@ public class JointPrivilegedConfigurationHandler
          String jointName = joint.getName();
          DoubleYoVariable yoJointPrivilegedConfiguration = new DoubleYoVariable("q_priv_" + jointName, registry);
          yoJointPrivilegedConfigurations.put(joint, yoJointPrivilegedConfiguration);
-         yoJointRateLimitedPrivilegedConfigurations.put(joint, new RateLimitedYoVariable("q_rate_limited_priv_" + jointName, registry, maxVelocity,
+         yoJointRateLimitedPrivilegedConfigurations.put(joint, new RateLimitedYoVariable("q_rate_limited_priv_" + jointName, registry, maxSetpointRate,
                yoJointPrivilegedConfiguration, controlDT));
          yoJointPrivilegedVelocities.put(joint, new DoubleYoVariable("qd_priv_" + jointName, registry));
          yoJointPrivilegedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
