@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -26,13 +27,16 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FootSwitchInterface footSwitch;
+
+   private boolean attemptToStraightenLegs = false;
 
    public FullyConstrainedState(FootControlHelper footControlHelper, YoVariableRegistry registry)
    {
@@ -46,13 +50,14 @@ public class FullyConstrainedState extends AbstractFootControlState
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
+      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
+      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    public void setWeight(double weight)
@@ -63,6 +68,16 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void setWeights(Vector3d angular, Vector3d linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
+   }
+
+   /**
+    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
+    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
+    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
+    */
+   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
+   {
+      this.attemptToStraightenLegs = attemptToStraightenLegs;
    }
 
    @Override
@@ -105,7 +120,12 @@ public class FullyConstrainedState extends AbstractFootControlState
    {
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
-      inverseDymamicsCommandsList.addCommand(privilegedConfigurationCommand);
+
+      if (attemptToStraightenLegs)
+         inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
+      else
+         inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
+
       return inverseDymamicsCommandsList;
    }
 

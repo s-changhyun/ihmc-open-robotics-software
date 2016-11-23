@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -62,9 +63,11 @@ public class SupportState extends AbstractFootControlState
    private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
 
+   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
    private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
@@ -95,7 +98,8 @@ public class SupportState extends AbstractFootControlState
    private final BooleanYoVariable requestFootholdExploration;
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
-   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
+
+   private boolean attemptToStraightenLegs = false;
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -146,13 +150,14 @@ public class SupportState extends AbstractFootControlState
       }
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
+      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
+      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -339,8 +344,23 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
-      inverseDymamicsCommandsList.addCommand(privilegedConfigurationCommand);
+
+      if (attemptToStraightenLegs)
+         inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
+      else
+         inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
+
       return inverseDymamicsCommandsList;
+   }
+
+   /**
+    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
+    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
+    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
+    */
+   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
+   {
+      this.attemptToStraightenLegs = attemptToStraightenLegs;
    }
 
    @Override

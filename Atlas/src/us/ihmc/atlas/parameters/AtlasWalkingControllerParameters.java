@@ -101,6 +101,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return runningOnRealRobot ? 0.3 : 0.0; // 0.3 seems to be a good starting point
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean doToeOffIfPossible()
    {
@@ -119,21 +120,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return true;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getMinStepLengthForToeOff()
    {
       return getFootLength();
    }
 
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required. John parameter
-    */
+   /** {@inheritDoc} */
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
       return true;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getMaximumToeOffAngle()
    {
@@ -172,6 +173,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
     return false; // Does more bad than good
    }
 
+   /** @inheritDoc */
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
@@ -1042,5 +1044,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getSwingFootVelocityAdjustmentDamping()
    {
       return runningOnRealRobot ? 0.8 : 0.5; // Robert: 0.8
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean controlHeightWithMomentum()
+   {
+      return false;
    }
 }
