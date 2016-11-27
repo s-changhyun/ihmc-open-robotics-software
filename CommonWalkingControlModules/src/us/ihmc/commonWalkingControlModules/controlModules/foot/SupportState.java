@@ -32,9 +32,11 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
 /**
  * This is the active foot state when the foot is in flat support. Usually the command to the QP
@@ -101,6 +103,17 @@ public class SupportState extends AbstractFootControlState
 
    private boolean attemptToStraightenLegs = false;
 
+   private final RigidBody pelvis;
+   private final RigidBody foot;
+   private final OneDoFJoint kneeJoint;
+
+   private final DoubleYoVariable straighteningTime;
+   private final DoubleYoVariable straightPosition;
+   private final DoubleYoVariable straighteningKp;
+
+   private MinimumJerkTrajectory kneeStraighteningTrajectory = new MinimumJerkTrajectory();
+
+
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -116,6 +129,13 @@ public class SupportState extends AbstractFootControlState
       copOnEdge = new BooleanYoVariable(prefix + "CopOnEdge", registry);
       footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
+
+      straighteningTime = new DoubleYoVariable(prefix + "StraighteningTime", registry);
+      straightPosition = new DoubleYoVariable(prefix + "StraightPosition", registry);
+      straighteningKp = new DoubleYoVariable(prefix + "StraighteningKp", registry);
+      straighteningTime.set(1.3);
+      straightPosition.set(0.05);
+      straighteningKp.set(10);
 
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
@@ -150,8 +170,9 @@ public class SupportState extends AbstractFootControlState
       }
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
+      pelvis = fullRobotModel.getPelvis();
+      foot = fullRobotModel.getFoot(robotSide);
+      kneeJoint = footControlHelper.getMomentumBasedController().getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
       straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
       straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
@@ -178,6 +199,12 @@ public class SupportState extends AbstractFootControlState
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       updateHoldPositionSetpoints();
+
+
+      double kneePosition = kneeJoint.getQ();
+      double kneeVelocity = kneeJoint.getQd();
+      double kneeAcceleration = kneeJoint.getQdd();
+      kneeStraighteningTrajectory.setMoveParameters(kneePosition, kneeVelocity, kneeAcceleration, straightPosition.getDoubleValue(), 0.0, 0.0, straighteningTime.getDoubleValue());
    }
 
    @Override
@@ -289,6 +316,12 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
       if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != dofs)
          throw new RuntimeException("Trying to control too much or too little.");
+
+      kneeStraighteningTrajectory.computeTrajectory(getTimeInCurrentState());
+      straightLegsPrivilegedConfigurationCommand.clear();
+      straightLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, kneeStraighteningTrajectory.getPosition());
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+      //straightLegsPrivilegedConfigurationCommand.setConfigurationGain(straighteningKp.getDoubleValue());
 
       // update visualization
       frameViz.setToReferenceFrame(controlFrame);

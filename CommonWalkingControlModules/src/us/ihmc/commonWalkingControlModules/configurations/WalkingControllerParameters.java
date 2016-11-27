@@ -341,6 +341,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     */
    public double getPercentOfSwingToStraightenLeg()
    {
-      return 0.7;
+      return 1.0;
    }
 }

@@ -79,12 +79,12 @@ public class JointPrivilegedConfigurationHandler
       // The nullspace computed during toe-off is wrong because it does not consider the jacobian nor the proper selection matrix.
       // That nullspace is used to project the privileged joint velocities/accelerations.
       // Set it to 20.0 when getting stuck in transfer. Be careful because 20.0 is not enough to escape singularity at the beginning of the swing.
-      configurationGain.set(40.0);
-      velocityGain.set(6.0);
+      configurationGain.set(100.0);
+      velocityGain.set(10.0);
       maxVelocity.set(2.0);
       maxSetpointRate.set(10.0);
       maxAcceleration.set(Double.POSITIVE_INFINITY);
-      weight.set(5.0);
+      weight.set(10.0);
 
       for (int i = 0; i < numberOfDoFs; i++)
       {
@@ -145,7 +145,7 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointVelocities()
    {
-      updatePrivilegedConfigurations();
+      //updatePrivilegedConfigurations();
       processPrivilegedConfigurationCommands();
 
       for (int i = 0; i < numberOfDoFs; i++)
@@ -164,7 +164,7 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointAccelerations()
    {
-      updatePrivilegedConfigurations();
+      //updatePrivilegedConfigurations();
       processPrivilegedConfigurationCommands();
 
       for (int i = 0; i < numberOfDoFs; i++)
