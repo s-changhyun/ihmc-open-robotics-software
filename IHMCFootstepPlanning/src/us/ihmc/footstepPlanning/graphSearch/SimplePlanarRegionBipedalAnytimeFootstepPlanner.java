@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -15,6 +16,11 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private BipedalFootstepPlannerNode closestNodeToGoal = null;
    private boolean stopRequested = false;
    private final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
+
+   public SimplePlanarRegionBipedalAnytimeFootstepPlanner(YoVariableRegistry parentRegistry)
+   {
+      super(parentRegistry);
+   }
 
    /**
     * @return The FootstepPlan that ends the closest to the goal of all explored yet
@@ -51,7 +57,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
          // Make sure popped node is a good one and can be expanded...
-         boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
+         boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(wiggleInsideDelta.getDoubleValue(), nodeToExpand);
          if (!snapSucceded)
             continue;
 

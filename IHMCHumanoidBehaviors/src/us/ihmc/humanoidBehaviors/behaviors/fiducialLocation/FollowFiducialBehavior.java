@@ -129,14 +129,14 @@ public class FollowFiducialBehavior extends AbstractBehavior
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
-      behaviorCommunicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
+      attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
    }
 
    private FootstepPlanner createFootstepPlanner()
    {
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.4);
       planner.setMaximumStepZ(0.25);
@@ -357,7 +357,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       leftFootPose.getPosition(temp);
       pointBetweenFeet.set(temp);
-      leftFootPose.getPosition(temp);
+      rightFootPose.getPosition(temp);
       pointBetweenFeet.add(temp);
       pointBetweenFeet.scale(0.5);
 
@@ -466,5 +466,30 @@ public class FollowFiducialBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return false;
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }
