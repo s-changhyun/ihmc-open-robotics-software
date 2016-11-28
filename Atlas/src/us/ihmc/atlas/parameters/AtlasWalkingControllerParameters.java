@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
@@ -56,6 +57,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private ExplorationParameters explorationParameters = null;
 
+   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+
    public AtlasWalkingControllerParameters(AtlasJointMap jointMap)
    {
       this(DRCRobotModel.RobotTarget.SCS, jointMap);
@@ -66,6 +69,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.target = target;
       this.jointMap = jointMap;
       runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -139,7 +144,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getAnkleLowerLimitToTriggerToeOff()
    {
-      return -0.7;
+      return -1.0;
    }
 
    /** {@inheritDoc} */
@@ -1066,5 +1071,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getPercentOfSwingToStraightenLeg()
    {
       return 0.7;
+   }
+
+   /** {@inheritDoc} */
+   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
+   {
+      return jointPrivilegedConfigurationParameters;
    }
 }

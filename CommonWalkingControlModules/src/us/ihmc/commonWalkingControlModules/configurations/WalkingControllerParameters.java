@@ -19,6 +19,8 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
+   protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
@@ -342,5 +344,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getPercentOfSwingToStraightenLeg()
    {
       return 1.0;
+   }
+
+   /**
+    * Returns the parameters used in the privileged configuration handler.
+    */
+   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
+   {
+      if (jointPrivilegedConfigurationParameters == null)
+         jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+
+      return jointPrivilegedConfigurationParameters;
    }
 }

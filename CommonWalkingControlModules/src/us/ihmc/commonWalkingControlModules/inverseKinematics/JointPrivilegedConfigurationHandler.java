@@ -9,13 +9,13 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -33,11 +33,9 @@ public class JointPrivilegedConfigurationHandler
    private final DoubleYoVariable configurationGain = new DoubleYoVariable("jointPrivilegedConfigurationGain", registry);
    private final DoubleYoVariable velocityGain = new DoubleYoVariable("jointPrivilegedVelocityGain", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationMaxVelocity", registry);
-   private final DoubleYoVariable maxSetpointRate = new DoubleYoVariable("jointPrivilegedConfigurationMaxSetpointRate", registry);
    private final DoubleYoVariable maxAcceleration = new DoubleYoVariable("jointPrivilegedConfigurationMaxAcceleration", registry);
 
    private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedConfigurations = new HashMap<>();
-   private final Map<OneDoFJoint, RateLimitedYoVariable> yoJointRateLimitedPrivilegedConfigurations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedVelocities = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedAccelerations = new HashMap<>();
 
@@ -61,7 +59,8 @@ public class JointPrivilegedConfigurationHandler
    private final ArrayList<OneDoFJoint> jointsWithConfiguration = new ArrayList<>();
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
-   public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, double controlDT, YoVariableRegistry parentRegistry)
+   public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+         YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
@@ -79,12 +78,11 @@ public class JointPrivilegedConfigurationHandler
       // The nullspace computed during toe-off is wrong because it does not consider the jacobian nor the proper selection matrix.
       // That nullspace is used to project the privileged joint velocities/accelerations.
       // Set it to 20.0 when getting stuck in transfer. Be careful because 20.0 is not enough to escape singularity at the beginning of the swing.
-      configurationGain.set(100.0);
-      velocityGain.set(10.0);
-      maxVelocity.set(2.0);
-      maxSetpointRate.set(10.0);
-      maxAcceleration.set(Double.POSITIVE_INFINITY);
-      weight.set(10.0);
+      configurationGain.set(jointPrivilegedConfigurationParameters.getConfigurationGain());
+      velocityGain.set(jointPrivilegedConfigurationParameters.getVelocityGain());
+      maxVelocity.set(jointPrivilegedConfigurationParameters.getMaxVelocity());
+      maxAcceleration.set(jointPrivilegedConfigurationParameters.getMaxAcceleration());
+      weight.set(jointPrivilegedConfigurationParameters.getWeight());
 
       for (int i = 0; i < numberOfDoFs; i++)
       {
@@ -104,8 +102,6 @@ public class JointPrivilegedConfigurationHandler
          String jointName = joint.getName();
          DoubleYoVariable yoJointPrivilegedConfiguration = new DoubleYoVariable("q_priv_" + jointName, registry);
          yoJointPrivilegedConfigurations.put(joint, yoJointPrivilegedConfiguration);
-         yoJointRateLimitedPrivilegedConfigurations.put(joint, new RateLimitedYoVariable("q_rate_limited_priv_" + jointName, registry, maxSetpointRate,
-               yoJointPrivilegedConfiguration, controlDT));
          yoJointPrivilegedVelocities.put(joint, new DoubleYoVariable("qd_priv_" + jointName, registry));
          yoJointPrivilegedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
       }
@@ -126,26 +122,11 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * Updates the privileged configurations according to a rate limited yo variable, to keep them from changing too quickly.
-    */
-   private void updatePrivilegedConfigurations()
-   {
-      for (int i = 0; i < numberOfDoFs; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         RateLimitedYoVariable yoJointRateLimitedPrivilegedConfiguration = yoJointRateLimitedPrivilegedConfigurations.get(joint);
-         yoJointRateLimitedPrivilegedConfiguration.update();
-         privilegedConfigurations.set(i, 0, yoJointRateLimitedPrivilegedConfiguration.getDoubleValue());
-      }
-   }
-
-   /**
     * Computes the desired joint velocity to be submitted to the inverse kinematics control core to achieve the desired privileged configuration.
     * Uses a simple proportional controller with saturation limits based on the position error.
     */
    public void computePrivilegedJointVelocities()
    {
-      //updatePrivilegedConfigurations();
       processPrivilegedConfigurationCommands();
 
       for (int i = 0; i < numberOfDoFs; i++)
@@ -164,7 +145,6 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointAccelerations()
    {
-      //updatePrivilegedConfigurations();
       processPrivilegedConfigurationCommands();
 
       for (int i = 0; i < numberOfDoFs; i++)

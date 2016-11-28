@@ -14,6 +14,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -70,9 +71,11 @@ public class MotionQPInputCalculatorTest
          twistCalculator.compute();
          InverseDynamicsJoint[] jointsToOptimizeFor = new InverseDynamicsJoint[numberOfJoints];
          joints.toArray(jointsToOptimizeFor);
+         JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
          JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
 
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
+               jointIndexHandler, jointPrivilegedConfigurationParameters, registry);
 
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.set(elevator, endEffector);
@@ -134,9 +137,11 @@ public class MotionQPInputCalculatorTest
          TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
          twistCalculator.compute();
          InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+         JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
          JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
 
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
+               jointIndexHandler, jointPrivilegedConfigurationParameters, registry);
 
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.set(elevator, endEffector);
