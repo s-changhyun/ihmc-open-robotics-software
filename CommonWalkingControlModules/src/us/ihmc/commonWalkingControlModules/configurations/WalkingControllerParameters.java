@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -14,6 +13,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
@@ -307,7 +307,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return 0.0;
    }
-   
+
    public double getMinSwingHeightFromStanceFoot()
    {
       return 0.1;
@@ -339,8 +339,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * Returns a percent of the swing state to switch the privileged configuration to having straight knees
     * @return ratio of swing state (0.0 to 1.0)
     */
-   public double getPercentOfSwingToStraightenLeg()
-   {
+   public double getPercentOfSwingToStraightenLeg() {
       return 0.7;
+   }
+
+   /**
+    * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
+    * (new feature to be tested with Atlas)
+    */
+   public boolean controlToeDuringSwing()
+   {
+      return false;
    }
 }
