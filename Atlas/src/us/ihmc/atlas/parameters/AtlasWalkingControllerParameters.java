@@ -38,6 +38,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
    private final DRCRobotModel.RobotTarget target;
+   private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    // Limits
@@ -50,12 +51,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
    private final double spineRollLimit = Math.PI / 4.0;
 
-   private final double min_leg_length_before_collapsing_single_support = 0.53;    // corresponds to q_kny = 1.70 rad
-   private final double min_mechanical_leg_length = 0.420;    // corresponds to a q_kny that is close to knee limit
+   private final double min_leg_length_before_collapsing_single_support;    // corresponds to q_kny = 1.70 rad
+   private final double min_mechanical_leg_length;    // corresponds to a q_kny that is close to knee limit
 
-   private final boolean runningOnRealRobot;
+   // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
+   private final double minimumHeightAboveGround;
+   private double       nominalHeightAboveGround;
+   private final double maximumHeightAboveGround;
 
    private final AtlasJointMap jointMap;
+   private final double massScale;
 
    private ExplorationParameters explorationParameters = null;
 
@@ -70,6 +75,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       this.target = target;
       this.jointMap = jointMap;
+      this.massScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
+
+      
+      min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
+      min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
+
+
+      minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );        
+      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );        
+      maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 ); 
+      
       runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
@@ -240,10 +256,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return defaultChestOrientationControlJointNames;
    }
 
-// USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.625;
-   private double nominalHeightAboveGround = 0.705;
-   private final double maximumHeightAboveGround = 0.765 + 0.08;
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;
