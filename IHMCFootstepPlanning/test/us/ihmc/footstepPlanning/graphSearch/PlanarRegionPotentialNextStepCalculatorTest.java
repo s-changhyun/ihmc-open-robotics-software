@@ -47,10 +47,9 @@ public class PlanarRegionPotentialNextStepCalculatorTest
          scs.startOnAThread();
       }
 
-      BipedalStepScorer bipedalStepScorer = new OrderInWhichConstructedStepScorer();
       BipedalFootstepPlannerParameters parameters = createPlannerParameters(registry);
 
-      PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, bipedalStepScorer, registry);
+      PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, registry);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
@@ -130,7 +129,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
 
       FootstepPlan footstepPlan = new FootstepPlan(endNode);
 //      System.out.println(footstepPlan.getNumberOfSteps());
-      listener.notifyListenerSolutionWasFound(footstepPlan);
+      listener.solutionWasFound(footstepPlan);
 
       assertTrue(footstepPlan.getNumberOfSteps() <= maxNumberOfExpectedFootsteps);
    }

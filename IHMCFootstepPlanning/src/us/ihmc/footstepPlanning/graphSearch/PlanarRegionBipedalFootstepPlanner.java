@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.scoring.PenalizationHeatmapStepScorer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -46,18 +44,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    private final BipedalFootstepPlannerParameters parameters;
 
-   public PlanarRegionBipedalFootstepPlanner(YoVariableRegistry parentRegistry)
+   public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
+      this.parameters = parameters;
       parentRegistry.addChild(registry);
-      parameters = new BipedalFootstepPlannerParameters(parentRegistry);
 
-      BipedalStepScorer bipedalStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null, parameters);
-      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, bipedalStepScorer, parentRegistry);
-   }
-
-   public BipedalFootstepPlannerParameters getParameters()
-   {
-      return parameters;
+      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -146,7 +138,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             continue;
 
          numberOfNodesExpanded.increment();
-         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
+         notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
          {
@@ -213,7 +205,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       if (listener != null)
       {
-         listener.notifyListenerSolutionWasFound(footstepPlan);
+         listener.solutionWasFound(footstepPlan);
       }
    }
 
@@ -221,15 +213,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       if (listener != null)
       {
-         listener.notifyListenerSolutionWasNotFound();
+         listener.solutionWasNotFound();
       }
    }
 
-   protected void notifyListenerNodeForExpansionWasAccepted(BipedalFootstepPlannerNode nodeToExpand)
+   protected void notifyListenerNodeIsBeingExpanded(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
-         listener.nodeForExpansionWasAccepted(nodeToExpand);
+         listener.nodeIsBeingExpanded(nodeToExpand);
       }
    }
 }
