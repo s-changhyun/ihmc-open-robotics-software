@@ -37,6 +37,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double CMP_POINT_SIZE = 0.005;
 
+   private static final boolean toeOffInSingleSupport = true;
+
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    /**
     * <li> When using only one CMP per support:
@@ -590,6 +592,16 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
             boolean isSteppingDownEnough = soleToSoleFrameVector.getZ() < -footstepHeightThresholdToPutExitCMPOnToes.getDoubleValue();
 
             putCMPOnToes = isSteppingForwardEnough && isSteppingDownEnough;
+         }
+      }
+      else if (toeOffInSingleSupport && !isUpcomingFootstepLast)
+      {
+         if (centroidInSoleFrameOfUpcomingSupportFoot != null)
+         {
+            soleFrameOrigin.setToZero(centroidInSoleFrameOfUpcomingSupportFoot.getReferenceFrame());
+            soleFrameOrigin.changeFrame(soleFrame);
+            soleToSoleFrameVector.setIncludingFrame(soleFrameOrigin);
+            putCMPOnToes = soleToSoleFrameVector.getX() > footstepLengthThresholdToPutExitCMPOnToes.getDoubleValue();
          }
       }
 

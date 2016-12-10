@@ -98,7 +98,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      return runningOnRealRobot ? 3.4 : 2.88; // 3.0 seems more appropriate.
+      //return runningOnRealRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
+      return 2.3;
 //      return 3.0;
    }
 
@@ -118,7 +119,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doToeOffIfPossibleInSingleSupport()
    {
-      return false;
+      return true;
    }
 
   @Override
@@ -131,8 +132,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMinStepLengthForToeOff()
    {
-      //return getFootLength();
-      return runningOnRealRobot ? getFootLength() : 0.0;
+      return getFootLength();
+      //return runningOnRealRobot ? getFootLength() : 0.0;
    }
 
    /** {@inheritDoc} */
@@ -146,14 +147,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getAnkleLowerLimitToTriggerToeOff()
    {
-      return -1.0;
+      return -0.35;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaximumToeOffAngle()
    {
-      double angle = runningOnRealRobot ? 45.0 : 60.0;
+      double angle = runningOnRealRobot ? 45.0 : 45.0;
       return Math.toRadians(angle);
    }
 
@@ -316,25 +317,25 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFootForwardOffset()
    {
-      return AtlasPhysicalProperties.footForward;
+      return jointMap.getPhysicalProperties().getFootForward();
    }
 
    @Override
    public double getFootBackwardOffset()
    {
-      return AtlasPhysicalProperties.footBackForControl;
+      return jointMap.getPhysicalProperties().getFootBackForControl();
    }
 
    @Override
    public double getAnkleHeight()
    {
-      return AtlasPhysicalProperties.ankleHeight;
+      return jointMap.getPhysicalProperties().getAnkleHeight();
    }
 
    @Override
    public double getLegLength()
    {
-      return AtlasPhysicalProperties.shinLength + AtlasPhysicalProperties.thighLength;
+      return jointMap.getPhysicalProperties().getShinLength() + jointMap.getPhysicalProperties().getThighLength();
    }
 
    @Override
@@ -742,7 +743,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultTransferTime()
    {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 0.25;
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 0.10;
    }
 
    @Override
@@ -789,31 +790,31 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFootWidth()
    {
-      return AtlasPhysicalProperties.footWidthForControl;
+      return jointMap.getPhysicalProperties().getFootWidthForControl();
    }
 
    @Override
    public double getToeWidth()
    {
-      return AtlasPhysicalProperties.toeWidthForControl;
+      return jointMap.getPhysicalProperties().getToeWidthForControl();
    }
 
    @Override
    public double getFootLength()
    {
-      return AtlasPhysicalProperties.footLengthForControl;
+      return jointMap.getPhysicalProperties().getFootLengthForControl();
    }
 
    @Override
    public double getActualFootWidth()
    {
-      return AtlasPhysicalProperties.actualFootWidth;
+      return jointMap.getPhysicalProperties().getActualFootWidth();
    }
 
    @Override
    public double getActualFootLength()
    {
-      return AtlasPhysicalProperties.actualFootLength;
+      return jointMap.getPhysicalProperties().getActualFootLength();
    }
 
    @Override
@@ -825,7 +826,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFoot_start_toetaper_from_back()
    {
-      return AtlasPhysicalProperties.footStartToetaperFromBack;
+      return jointMap.getPhysicalProperties().getFootStartToetaperFromBack();
    }
 
    @Override
@@ -912,7 +913,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doFancyOnToesControl()
    {
-      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return !runningOnRealRobot;
    }
 
    @Override

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
@@ -24,6 +25,8 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 public class WalkingSingleSupportState extends SingleSupportState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private static final double minimumTimeRatio = 0.5;
 
    private Footstep nextFootstep;
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
@@ -203,13 +206,18 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
    }
 
+   private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
-      if (feetManager.doToeOffIfPossibleInSingleSupport())
+      if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
-         boolean willDoToeOff = feetManager.willDoToeOff(nextFootstep, swingSide);
+         balanceManager.getDesiredCMP(desiredCMP);
 
-         if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && balanceManager.isOnExitCMP())
+         boolean pastMinimumTime = getTimeInCurrentState() > minimumTimeRatio * walkingMessageHandler.getSwingTime();
+
+         boolean doToeOff = feetManager.checkIfToeOffSafeSingleSupport(swingSide, balanceManager.isOnExitCMP());
+
+         if (doToeOff && pastMinimumTime)
          {
             balanceManager.getNextExitCMP(nextExitCMP);
             feetManager.setExitCMPForToeOff(supportSide, nextExitCMP);
@@ -249,8 +257,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));
       double extraToeOffHeight = 0.0;
+      /* FIXME
       if (feetManager.willDoToeOff(nextFootstep, swingSide))
          extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
+         */
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
