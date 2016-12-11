@@ -152,6 +152,8 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public void doSpecificAction()
    {
+      feedbackControlCommandList.clear();
+
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
@@ -181,6 +183,9 @@ public class OnToesState extends AbstractFootControlState
       pointFeedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
       setupSingleContactPoint();
+
+      feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
    }
 
    private void computeDesiredsForFreeMotion()
