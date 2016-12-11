@@ -114,7 +114,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      //return runningOnRealRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
+      //return (runningOnRealRobot ? 3.4 : 3.0) / Math.sqrt(jointMap.getModelScale()); // 3.0 seems more appropriate.
       return 2.3;
 //      return 3.0;
    }
@@ -201,7 +201,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean allowShrinkingSingleSupportFootPolygon()
    {
-//    return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+//    return runningOnRealRobot;
     return false; // Does more bad than good
    }
 
@@ -227,7 +227,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
+      if (runningOnRealRobot)
          return 0.6;
       else
          return 0.3;
@@ -235,7 +235,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    public boolean isNeckPositionControlled()
    {
-      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
+      if (runningOnRealRobot)
          return true;
       else
          return false;
@@ -293,8 +293,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double defaultOffsetHeightAboveAnkle()
    {
-      double defaultOffset = target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 0.035 : 0.0;
-      return defaultOffset;
+      double defaultOffset = runningOnRealRobot ? 0.035 : 0.0;
+      return defaultOffset * jointMap.getModelScale();
    }
 
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
@@ -461,7 +461,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
 
-//      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
       return gains;
    }
@@ -755,13 +754,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultTransferTime()
    {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 0.10;
+      return (runningOnRealRobot ? 0.8 : 0.25); //Math.sqrt(jointMap.getModelScale()) *
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 1.2 : 0.60;
+      return (runningOnRealRobot ? 1.2 : 0.60); //Math.sqrt(jointMap.getModelScale()) *
    }
 
    /** @inheritDoc */
@@ -1076,13 +1075,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public boolean controlHeightWithMomentum()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean controlToeDuringSwing()
    {
       return true;
@@ -1099,5 +1091,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean controlHeightWithMomentum()
+   {
+      return false;
    }
 }

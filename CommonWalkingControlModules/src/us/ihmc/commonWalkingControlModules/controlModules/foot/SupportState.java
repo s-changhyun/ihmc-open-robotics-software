@@ -68,8 +68,6 @@ public class SupportState extends AbstractFootControlState
    private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
    private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
@@ -112,7 +110,6 @@ public class SupportState extends AbstractFootControlState
    private final DoubleYoVariable straighteningKp;
 
    private MinimumJerkTrajectory kneeStraighteningTrajectory = new MinimumJerkTrajectory();
-
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -384,16 +381,6 @@ public class SupportState extends AbstractFootControlState
          inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
 
       return inverseDymamicsCommandsList;
-   }
-
-   /**
-    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
-    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
-    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
-    */
-   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
-   {
-      this.attemptToStraightenLegs = attemptToStraightenLegs;
    }
 
    @Override

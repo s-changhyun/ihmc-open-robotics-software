@@ -74,11 +74,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+<<<<<<< HEAD
     * To enable that feature, doToeOffIfPossible() return true is required. John parameter
+=======
+    * To enable that feature, {@link WalkingControllerParameters#doToeOffIfPossible()} return true is required. John parameter
+>>>>>>> develop
     */
    public abstract boolean doToeOffWhenHittingAnkleLimit();
 
    /**
+<<<<<<< HEAD
     * Ankle limit that triggers {@link WalkingControllerParameters#doToeOffWhenHittingAnkleLimit()}
     * @return ankle limit
     */
@@ -88,6 +93,8 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+=======
+>>>>>>> develop
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle
     */
