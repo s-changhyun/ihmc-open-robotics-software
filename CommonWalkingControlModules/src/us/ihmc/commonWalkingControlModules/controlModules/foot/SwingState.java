@@ -57,10 +57,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable doContinuousReplanning;
    private final YoVariableDoubleProvider swingTimeRemaining;
 
-   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-
    private final TwoWaypointPositionTrajectoryGenerator swingTrajectoryGenerator;
    private final CurrentConfigurationProvider stanceConfigurationProvider;
 
@@ -211,18 +207,6 @@ public class SwingState extends AbstractUnconstrainedState
       currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
-
-      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      //privilegedConfigurationCommand.set(bentLegsPrivilegedConfigurationCommand);
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -468,10 +452,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       if (currentTime.getDoubleValue() > (percentOfSwingToStraightenLeg.getDoubleValue() * swingTimeProvider.getValue()) && attemptToStraightenLegs &&
             !hasSwitchedToStraightLegs.getBooleanValue())
-      {
-         privilegedConfigurationCommand.set(straightLegsPrivilegedConfigurationCommand);
          hasSwitchedToStraightLegs.set(true);
-      }
    }
 
    /**
@@ -517,7 +498,6 @@ public class SwingState extends AbstractUnconstrainedState
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
-      privilegedConfigurationCommand.set(bentLegsPrivilegedConfigurationCommand);
       hasSwitchedToStraightLegs.set(false);
    }
 
@@ -541,6 +521,9 @@ public class SwingState extends AbstractUnconstrainedState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return privilegedConfigurationCommand;
+      if (hasSwitchedToStraightLegs.getBooleanValue())
+         return straightLegsPrivilegedConfigurationCommand;
+      else
+         return bentLegsPrivilegedConfigurationCommand;
    }
 }

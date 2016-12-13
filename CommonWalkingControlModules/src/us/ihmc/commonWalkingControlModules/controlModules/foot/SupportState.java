@@ -99,8 +99,6 @@ public class SupportState extends AbstractFootControlState
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
 
-   private boolean attemptToStraightenLegs = false;
-
    private final RigidBody pelvis;
    private final RigidBody foot;
    private final OneDoFJoint kneeJoint;
@@ -170,12 +168,6 @@ public class SupportState extends AbstractFootControlState
       pelvis = fullRobotModel.getPelvis();
       foot = fullRobotModel.getFoot(robotSide);
       kneeJoint = footControlHelper.getMomentumBasedController().getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-
-      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);

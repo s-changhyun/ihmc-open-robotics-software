@@ -27,8 +27,6 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
@@ -48,16 +46,6 @@ public class FullyConstrainedState extends AbstractFootControlState
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
-
-      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    public void setWeight(double weight)
@@ -68,16 +56,6 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void setWeights(Vector3d angular, Vector3d linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
-   }
-
-   /**
-    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
-    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
-    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
-    */
-   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
-   {
-      this.attemptToStraightenLegs = attemptToStraightenLegs;
    }
 
    @Override

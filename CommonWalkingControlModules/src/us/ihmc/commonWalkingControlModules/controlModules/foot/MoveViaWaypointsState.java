@@ -35,8 +35,6 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-
    private final ReferenceFrame footFrame;
 
    private final BooleanYoVariable isTrajectoryStopped;
@@ -79,13 +77,6 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
       isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedFootTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
-
-      privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    public void holdCurrentPosition()
@@ -309,11 +300,5 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    public boolean isDone()
    {
       return true;
-   }
-
-   @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return privilegedConfigurationCommand;
    }
 }

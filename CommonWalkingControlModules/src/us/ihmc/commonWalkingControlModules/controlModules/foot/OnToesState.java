@@ -43,8 +43,6 @@ public class OnToesState extends AbstractFootControlState
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
-   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
@@ -121,16 +119,6 @@ public class OnToesState extends AbstractFootControlState
          MatrixTools.removeRow(selectionMatrix, 3); // Remove linear part
       MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
-
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = fullRobotModel.getFoot(robotSide);
-
-      straightLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      bentLegsPrivilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       exitCMP2d.setToNaN(soleFrame);
       exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
@@ -279,16 +267,6 @@ public class OnToesState extends AbstractFootControlState
       this.exitCMP.setIncludingFrame(exitCMP);
       this.exitCMP.changeFrame(soleFrame);
       exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
-   }
-
-   /**
-    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
-    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
-    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
-    */
-   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
-   {
-      this.attemptToStraightenLegs = attemptToStraightenLegs;
    }
 
    @Override
