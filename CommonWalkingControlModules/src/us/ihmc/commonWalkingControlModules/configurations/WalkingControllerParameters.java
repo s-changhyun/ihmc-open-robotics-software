@@ -79,14 +79,13 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract boolean doToeOffWhenHittingAnkleLimit();
 
    /**
-    * Ankle limit that triggers {@link WalkingControllerParameters#doToeOffWhenHittingAnkleLimit()}
-    * @return ankle limit
+    * Ankle limit that triggers {@link WalkingControllerParameters#doToeOffWhenHittingAnkleLimit()}.
+    * The minimum limit is taken between the returned value and the joint limit.
     */
    public double getAnkleLowerLimitToTriggerToeOff()
    {
       return -1.0;
    }
-
    /**
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle

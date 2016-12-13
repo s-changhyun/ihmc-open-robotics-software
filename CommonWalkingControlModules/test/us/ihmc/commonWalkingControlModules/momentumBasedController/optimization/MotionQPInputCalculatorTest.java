@@ -42,7 +42,6 @@ public class MotionQPInputCalculatorTest
    public void testPointAccelerationCommandsWithChainRobot() throws Exception
    {
       Random random = new Random(5641654L);
-      double controlDT = 0.002;
 
       for (int iteration = 0; iteration < 100; iteration++)
       {
@@ -109,7 +108,6 @@ public class MotionQPInputCalculatorTest
    public void testPointAccelerationCommandsWithFloatingChainRobot() throws Exception
    {
       Random random = new Random(5641654L);
-      double controlDT = 0.002;
 
       for (int iteration = 0; iteration < 100; iteration++)
       {

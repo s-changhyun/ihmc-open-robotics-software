@@ -100,8 +100,7 @@ public class JointPrivilegedConfigurationHandler
          positionsAtMidRangeOfMotion.set(i, 0, 0.5 * (jointLimitUpper + jointLimitLower));
 
          String jointName = joint.getName();
-         DoubleYoVariable yoJointPrivilegedConfiguration = new DoubleYoVariable("q_priv_" + jointName, registry);
-         yoJointPrivilegedConfigurations.put(joint, yoJointPrivilegedConfiguration);
+         yoJointPrivilegedConfigurations.put(joint, new DoubleYoVariable("q_priv_" + jointName, registry));
          yoJointPrivilegedVelocities.put(joint, new DoubleYoVariable("qd_priv_" + jointName, registry));
          yoJointPrivilegedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
       }

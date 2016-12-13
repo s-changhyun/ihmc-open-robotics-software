@@ -135,7 +135,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return getFootLength();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * To enable that feature, doToeoffIfPossible() return true is required.
+    */
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
