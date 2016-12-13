@@ -95,20 +95,19 @@ public class WholeBodyControllerCore
          if (inverseDynamicsSolver != null)
             inverseDynamicsSolver.reset();
          else
-            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
       case INVERSE_KINEMATICS:
          if (inverseKinematicsSolver != null)
             inverseKinematicsSolver.reset();
          else
-            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
       case VIRTUAL_MODEL:
          if (virtualModelControlSolver != null)
             virtualModelControlSolver.clear();
          else
-            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
-
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
       case OFF:
          break;
@@ -144,7 +143,6 @@ public class WholeBodyControllerCore
             inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
          else
             throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
-
          break;
       case VIRTUAL_MODEL:
          if (virtualModelControlSolver != null)
