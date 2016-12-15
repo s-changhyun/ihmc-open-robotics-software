@@ -45,6 +45,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 
 public class LLAQuadrupedControllerFactoryDummyOutputDemo
 {
+   private final QuadrupedForceControllerState[] statesToTest;
    private static final boolean USE_KINEMATICS_BASED_STATE_ESTIMATOR = true;
    private static final double GRAVITY = 9.81;
 
@@ -55,8 +56,9 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
    private DRCStateEstimatorInterface simulationStateEstimator;
    private QuadrupedRuntimeEnvironment runtimeEnvironment;
    
-   public LLAQuadrupedControllerFactoryDummyOutputDemo() throws IOException
+   public LLAQuadrupedControllerFactoryDummyOutputDemo(QuadrupedForceControllerState[] statesToTest) throws IOException
    {
+      this.statesToTest = statesToTest;
       // Load parameters. Note that this happens after initializing all other modules so all parameters are registered before loading.
       ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
 
@@ -175,7 +177,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
 
       DoubleYoVariable robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
-      for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
+      for (QuadrupedForceControllerState state : statesToTest)
       {
          FiniteStateMachineState<ControllerEvent> stateImpl = controllerManager.getState(state);
 
@@ -184,6 +186,8 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
 
          long min = Long.MAX_VALUE;
          long max = 0;
+         
+         System.out.println("--- Starting realtime control loop for " + state + " ---");
          
          long startTime = System.nanoTime();
          for (int i = 0; i < TEST_ITERATIONS; i++)
@@ -205,11 +209,11 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
             }
          }
          long endTime = System.nanoTime() - startTime;
+         System.out.println(state + ": " + TimeTools.nanoSecondstoSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + TimeTools.nanoSecondstoSeconds(min) + "s ; max: " + TimeTools.nanoSecondstoSeconds(max) + "s") ;
          
          stateImpl.onExit();
          
          
-         System.out.println(state + ": " + TimeTools.nanoSecondstoSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + TimeTools.nanoSecondstoSeconds(min) + "s ; max: " + TimeTools.nanoSecondstoSeconds(max) + "s") ;
          
       }
       robotTimestamp.set(robotTimeBeforeWarmUp);
@@ -220,7 +224,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
    
    public static void main(String[] args) throws IOException
    {
-      LLAQuadrupedControllerFactoryDummyOutputDemo llaQuadrupedControllerFactoryDummyOutputDemo = new LLAQuadrupedControllerFactoryDummyOutputDemo();
+      LLAQuadrupedControllerFactoryDummyOutputDemo llaQuadrupedControllerFactoryDummyOutputDemo = new LLAQuadrupedControllerFactoryDummyOutputDemo(QuadrupedForceControllerState.values);
       
       llaQuadrupedControllerFactoryDummyOutputDemo.run();
       
