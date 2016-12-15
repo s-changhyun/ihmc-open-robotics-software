@@ -121,6 +121,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.10 * jointMap.getModelScale();
+   }
+   
+   @Override
    public double getTimeToGetPreparedForLocomotion()
    {
       return runningOnRealRobot ? 0.3 : 0.0; // 0.3 seems to be a good starting point
