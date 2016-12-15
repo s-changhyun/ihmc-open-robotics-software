@@ -182,12 +182,12 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
          FiniteStateMachineState<ControllerEvent> stateImpl = controllerManager.getState(state);
 
          
+         System.out.println("--- Starting realtime control loop for " + state + " ---");
          stateImpl.onEntry();
 
          long min = Long.MAX_VALUE;
          long max = 0;
          
-         System.out.println("--- Starting realtime control loop for " + state + " ---");
          
          long startTime = System.nanoTime();
          for (int i = 0; i < TEST_ITERATIONS; i++)
