@@ -45,4 +45,46 @@ public class AtlasJointPrivilegedConfigurationParameters extends JointPrivileged
    {
       return 5.0;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getSupportKneeConfigurationGain()
+   {
+      return 100.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getSupportKneeVelocityGain()
+   {
+      return 6.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getUnconstrainedKneeConfigurationGain()
+   {
+      return 250.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getUnconstrainedKneeVelocityGain()
+   {
+      return 10.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getOnToesKneeConfigurationGain()
+   {
+      return 250.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getOnToesKneeVelocityGain()
+   {
+      return 10.0;
+   }
 }

@@ -121,4 +121,18 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    {
       return 0.5;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinTimeToSpendOnExitCMPInSingleSupport()
+   {
+      return 0.2;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean putExitCMPOnToes()
+   {
+      return true;
+   }
 }

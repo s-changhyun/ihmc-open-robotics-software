@@ -141,7 +141,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doToeOffIfPossibleInSingleSupport()
    {
-      return false;
+      return true;
    }
 
   @Override
@@ -168,7 +168,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getAnkleLowerLimitToTriggerToeOff()
    {
-      return -1.0;
+      return -0.45;
    }
 
 
@@ -1097,6 +1097,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean controlHeightWithMomentum()
    {
+      return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean attemptToStraightenLegs()
+   {
       return true;
    }
 
@@ -1104,6 +1111,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPProximityToLeadingFootForToeOff()
    {
-      return 0.0;
+      return 0.05;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getStraightKneeAngle()
+   {
+      return 0.5;
    }
 }
