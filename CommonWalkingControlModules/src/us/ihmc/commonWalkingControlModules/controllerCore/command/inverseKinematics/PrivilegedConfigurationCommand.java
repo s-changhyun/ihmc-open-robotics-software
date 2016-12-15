@@ -33,6 +33,12 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    private double maxVelocity = Double.NaN;
    private double maxAcceleration = Double.NaN;
 
+   private double defaultWeight = Double.NaN;
+   private double defaultConfigurationGain = Double.NaN;
+   private double defaultVelocityGain = Double.NaN;
+   private double defaultMaxVelocity = Double.NaN;
+   private double defaultMaxAcceleration = Double.NaN;
+
    public PrivilegedConfigurationCommand()
    {
       clear();
@@ -65,7 +71,32 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public void setDefaultWeight(double defaultWeight)
    {
-      this.weight = defaultWeight;
+      this.defaultWeight = defaultWeight;
+   }
+
+   public void setDefaultConfigurationGain(double defaultConfigurationGain)
+   {
+      this.defaultConfigurationGain = defaultConfigurationGain;
+   }
+
+   public void setDefaultVelocityGain(double defaultVelocityGain)
+   {
+      this.defaultVelocityGain = defaultVelocityGain;
+   }
+
+   public void setDefaultMaxVelocity(double defaultMaxVelocity)
+   {
+      this.defaultMaxVelocity = defaultMaxVelocity;
+   }
+
+   public void setDefaultMaxAcceleration(double defaultMaxAcceleration)
+   {
+      this.defaultMaxAcceleration = defaultMaxAcceleration;
+   }
+
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
    }
 
    public void setConfigurationGain(double configurationGain)
@@ -118,7 +149,18 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       clear();
       enable = other.enable;
       defaultOption = other.defaultOption;
+
       weight = other.weight;
+      configurationGain = other.configurationGain;
+      velocityGain = other.velocityGain;
+      maxVelocity = other.maxVelocity;
+      maxAcceleration = other.maxAcceleration;
+
+      defaultWeight = other.defaultWeight;
+      defaultConfigurationGain = other.defaultConfigurationGain;
+      defaultVelocityGain = other.defaultVelocityGain;
+      defaultMaxVelocity = other.defaultMaxVelocity;
+      defaultMaxAcceleration = other.defaultMaxAcceleration;
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
@@ -135,7 +177,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return enable;
    }
 
-   public boolean hasNewWeight()
+   public boolean hasWeight()
    {
       return !Double.isNaN(weight);
    }
@@ -145,7 +187,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return weight;
    }
 
-   public boolean hasNewConfigurationGain()
+   public boolean hasConfigurationGain()
    {
       return !Double.isNaN(configurationGain);
    }
@@ -155,7 +197,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return configurationGain;
    }
 
-   public boolean hasNewVelocityGain()
+   public boolean hasVelocityGain()
    {
       return !Double.isNaN(velocityGain);
    }
@@ -165,7 +207,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return velocityGain;
    }
 
-   public boolean hasNewMaxVelocity()
+   public boolean hasMaxVelocity()
    {
       return !Double.isNaN(maxVelocity);
    }
@@ -175,7 +217,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return maxVelocity;
    }
 
-   public boolean hasNewMaxAcceleration()
+   public boolean hasMaxAcceleration()
    {
       return !Double.isNaN(maxAcceleration);
    }
@@ -184,6 +226,57 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    {
       return maxAcceleration;
    }
+
+   public boolean hasNewDefaultWeight()
+   {
+      return !Double.isNaN(defaultWeight);
+   }
+
+   public double getDefaultWeight()
+   {
+      return defaultWeight;
+   }
+
+   public boolean hasNewDefaultConfigurationGain()
+   {
+      return !Double.isNaN(defaultConfigurationGain);
+   }
+
+   public double getDefaultConfigurationGain()
+   {
+      return defaultConfigurationGain;
+   }
+
+   public boolean hasNewDefaultVelocityGain()
+   {
+      return !Double.isNaN(defaultVelocityGain);
+   }
+
+   public double getDefaultVelocityGain()
+   {
+      return defaultVelocityGain;
+   }
+
+   public boolean hasNewDefaultMaxVelocity()
+   {
+      return !Double.isNaN(defaultMaxVelocity);
+   }
+
+   public double getDefaultMaxVelocity()
+   {
+      return defaultMaxVelocity;
+   }
+
+   public boolean hasNewDefaultMaxAcceleration()
+   {
+      return !Double.isNaN(defaultMaxAcceleration);
+   }
+
+   public double getDefaultMaxAcceleration()
+   {
+      return defaultMaxAcceleration;
+   }
+
 
    public boolean hasNewPrivilegedConfigurationDefaultOption()
    {
