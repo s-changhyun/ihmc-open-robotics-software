@@ -134,7 +134,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       walkingMessageHandler.clearFootTrajectory();
 
-      switchToToeOffIfPossible(supportSide);
+      switchToToeOffIfPossible();
    }
 
    @Override
@@ -205,13 +205,17 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
-   public void switchToToeOffIfPossible(RobotSide supportSide)
+   private final FramePoint2d currentICP = new FramePoint2d(worldFrame);
+   private final FramePoint2d desiredICP = new FramePoint2d(worldFrame);
+   public void switchToToeOffIfPossible()
    {
       if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
          balanceManager.getDesiredCMP(desiredCMP);
+         balanceManager.getCapturePoint(currentICP);
+         balanceManager.getDesiredICP(desiredICP);
 
-         if (feetManager.checkIfToeOffSafeSingleSupport(supportSide, balanceManager.isOnExitCMP()))
+         if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, currentICP, desiredICP, balanceManager.isOnExitCMP()))
          {
             balanceManager.getNextExitCMP(nextExitCMP);
             feetManager.setExitCMPForToeOff(supportSide, nextExitCMP);
