@@ -312,12 +312,12 @@ public class FeetManager
    }
 
    /**
-    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint2d, FramePoint2d, boolean)}
+    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint2d, FramePoint2d, FramePoint2d, boolean)}
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
+   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint2d desiredCMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
    {
-      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, currentICP, desiredICP, isOnExitCMP);
+      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, desiredCMP, currentICP, desiredICP, isOnExitCMP);
 
       return walkOnTheEdgesManager.doToeOff();
    }
@@ -329,9 +329,9 @@ public class FeetManager
       setOnToesContactState(trailingLeg);
    }
 
-   public void setExitCMPForToeOff(RobotSide robotSide, FramePoint exitCMP)
+   public void computeToeOffContactPoint(RobotSide robotSide, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      footControlModules.get(robotSide).setExitCMPForToeOff(exitCMP);
+      footControlModules.get(robotSide).computeToeOffContactPoint(exitCMP, desiredCMP);
    }
 
    public void reset()
