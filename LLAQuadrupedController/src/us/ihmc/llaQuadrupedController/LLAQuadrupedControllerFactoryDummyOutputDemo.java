@@ -181,6 +181,16 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
       {
          FiniteStateMachineState<ControllerEvent> stateImpl = controllerManager.getState(state);
 
+         stateImpl.onEntry();
+
+         System.out.println("--- Starting warmup loop for " + state + " ---");
+         for (int i = 0; i < 10000; i++)
+         {
+            simulationStateEstimator.doControl();
+            stateImpl.process();
+         }
+         
+         stateImpl.onExit();
          
          System.out.println("--- Starting realtime control loop for " + state + " ---");
          stateImpl.onEntry();
