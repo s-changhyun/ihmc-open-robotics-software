@@ -140,7 +140,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       walkingMessageHandler.clearFootTrajectory();
 
-      switchToToeOffIfPossible();
+      switchToToeOffIfPossible(supportSide);
    }
 
    @Override
@@ -223,7 +223,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePoint2d currentICP = new FramePoint2d(worldFrame);
    private final FramePoint2d desiredICP = new FramePoint2d(worldFrame);
 
-   public void switchToToeOffIfPossible()
+   public void switchToToeOffIfPossible(RobotSide supportSide)
    {
       if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
