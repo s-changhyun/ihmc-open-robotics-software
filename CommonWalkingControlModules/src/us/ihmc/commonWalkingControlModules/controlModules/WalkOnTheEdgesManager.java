@@ -9,6 +9,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -17,6 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,7 +40,9 @@ public class WalkOnTheEdgesManager
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
 
    private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
-   private final DoubleYoVariable icpProximityToLeadingFootForToeOff = new DoubleYoVariable("icpProximityToLeadingFootForToeOff", registry);
+   private final DoubleYoVariable icpProximityToLeadingFootForDSToeOff = new DoubleYoVariable("icpProximityToLeadingFootForDSToeOff", registry);
+   private final DoubleYoVariable icpProximityToLeadingFootForSSToeOff = new DoubleYoVariable("icpProximityToLeadingFootForSSToeOff", registry);
+   private final DoubleYoVariable icpPercentOfStanceForSSToeOff = new DoubleYoVariable("icpPercentOfStanceForSSToeOff", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
@@ -54,6 +58,7 @@ public class WalkOnTheEdgesManager
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final SideDependentList<FrameConvexPolygon2d> footDefaultPolygons;
    private final FrameConvexPolygon2d leadingFootSupportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d onToesSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d nextFootstepPolygon = new FrameConvexPolygon2d();
 
    private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
@@ -62,6 +67,7 @@ public class WalkOnTheEdgesManager
    private final FramePoint tempTrailingFootPosition = new FramePoint();
    private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
    private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
+   private final FrameVector toLeadingFoot = new FrameVector();
 
    private final WalkingControllerParameters walkingControllerParameters;
 
@@ -88,7 +94,8 @@ public class WalkOnTheEdgesManager
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
 
       this.ankleLowerLimitToTriggerToeOff.set(walkingControllerParameters.getAnkleLowerLimitToTriggerToeOff());
-      this.icpProximityToLeadingFootForToeOff.set(walkingControllerParameters.getICPProximityToLeadingFootForToeOff());
+      this.icpProximityToLeadingFootForDSToeOff.set(walkingControllerParameters.getICPProximityToLeadingFootForToeOff());
+      this.icpPercentOfStanceForSSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForSSToeOff());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -98,6 +105,7 @@ public class WalkOnTheEdgesManager
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
 
+      //TODO: extract param
       extraCoMMaxHeightWithToes.set(0.08);
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
@@ -173,23 +181,20 @@ public class WalkOnTheEdgesManager
          leadingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       }
 
+      updateOnToesSupportPolygon(trailingLeg, leadingFootSupportPolygon);
+
       if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
-      {
-         updateOnToesSupportPolygon(trailingLeg, leadingFootSupportPolygon);
          isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
-      }
       else
-      {
          isDesiredECMPOKForToeOff.set(true);
-      }
 
       boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
-      if (icpProximityToLeadingFootForToeOff.getDoubleValue() > 0.0)
+      if (icpProximityToLeadingFootForDSToeOff.getDoubleValue() > 0.0)
       {
          isDesiredICPOKForToeOff =
-               onToesSupportPolygon.isPointInside(desiredICP) && leadingFootSupportPolygon.distance(desiredICP) < icpProximityToLeadingFootForToeOff.getDoubleValue();
+               onToesSupportPolygon.isPointInside(desiredICP) && leadingFootSupportPolygon.distance(desiredICP) < (icpProximityToLeadingFootForDSToeOff.getDoubleValue());
          isCurrentICPOKForToeOff =
-               onToesSupportPolygon.isPointInside(currentICP) && leadingFootSupportPolygon.distance(currentICP) < icpProximityToLeadingFootForToeOff.getDoubleValue();
+               onToesSupportPolygon.isPointInside(currentICP) && leadingFootSupportPolygon.distance(currentICP) < (icpProximityToLeadingFootForDSToeOff.getDoubleValue());
       }
       else
       {
@@ -200,26 +205,11 @@ public class WalkOnTheEdgesManager
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
 
-      needToSwitchToToeOffForAnkleLimit.set(checkAnkleLimitForToeOff(trailingLeg));
-      if (needToSwitchToToeOffForAnkleLimit.getBooleanValue())
-      {
-         doToeOff.set(true);
+      boolean finishedChecks = checkToeOffConditions(trailingLeg);
+      if (finishedChecks)
          return;
-      }
 
-      if (!isDesiredECMPOKForToeOff.getBooleanValue())
-      {
-         doToeOff.set(false);
-         return;
-      }
-
-      if (!this.isDesiredICPOKForToeOff.getBooleanValue() || !this.isCurrentICPOKForToeOff.getBooleanValue())
-      {
-         doToeOff.set(false);
-         return;
-      }
-
-      isReadyToSwitchToToeOff(trailingLeg);
+      isReadyToSwitchToToeOff(trailingLeg, feet.get(leadingLeg).getFrameAfterParentJoint());
    }
 
    /**
@@ -242,11 +232,12 @@ public class WalkOnTheEdgesManager
     * </p>
     *
     * @param nextFootstep the upcoming footstep
+    * @param desiredECMP current location of the desired ECMP
     * @param currentICP current location of the instantaneous capture point
     * @param desiredICP desired location of the instantaneous capture point
     * @param isOnExitCMP boolean as to whether or not the current ICP plan is attempting to use the exit CMP. Sets the variable {@link WalkOnTheEdgesManager#isDesiredECMPOKForToeOff}.
     */
-   public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
+   public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
    {
       RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
 
@@ -267,24 +258,82 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      isCurrentICPOKForToeOff.set(onToesSupportPolygon.isPointInside(currentICP));
-      isDesiredICPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredICP));
+      List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
+      if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
+      {
+         nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, predictedContactPoints);
+      }
+      else
+      {
+         nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
+      }
 
-      isDesiredECMPOKForToeOff.set(isOnExitCMP);
-      needToSwitchToToeOffForAnkleLimit.set(checkAnkleLimitForToeOff(trailingLeg));
-      if (!needToSwitchToToeOffForAnkleLimit.getBooleanValue())
+      nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+
+      updateOnToesSupportPolygon(trailingLeg, nextFootstepPolygon);
+
+      if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
+         isDesiredECMPOKForToeOff.set(isOnExitCMP && onToesSupportPolygon.isPointInside(desiredECMP));
+      else
+         isDesiredECMPOKForToeOff.set(isOnExitCMP);
+
+      boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
+      if (icpPercentOfStanceForSSToeOff.getDoubleValue() > 0.0)
+      {
+         // compute stance length
+         ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
+         tempLeadingFootPosition.setToZero(footstepSoleFrame);
+         tempTrailingFootPosition.setToZero(trailingFootFrame);
+         tempLeadingFootPosition.changeFrame(trailingFootFrame);
+
+         toLeadingFoot.setToZero(trailingFootFrame);
+         toLeadingFoot.set(tempLeadingFootPosition);
+         toLeadingFoot.sub(tempTrailingFootPosition);
+
+         icpProximityToLeadingFootForSSToeOff.set(icpPercentOfStanceForSSToeOff.getDoubleValue() * toLeadingFoot.length());
+         isDesiredICPOKForToeOff =
+               onToesSupportPolygon.isPointInside(desiredICP) && nextFootstepPolygon.distance(desiredICP) < (icpProximityToLeadingFootForSSToeOff.getDoubleValue());
+         isCurrentICPOKForToeOff =
+               onToesSupportPolygon.isPointInside(currentICP) && nextFootstepPolygon.distance(currentICP) < (icpProximityToLeadingFootForSSToeOff.getDoubleValue());
+      }
+      else
+      {
+         isDesiredICPOKForToeOff = nextFootstepPolygon.isPointInside(desiredICP);
+         isCurrentICPOKForToeOff = nextFootstepPolygon.isPointInside(currentICP);
+      }
+
+      this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
+      this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
+
+      boolean finishedChecks = checkToeOffConditions(trailingLeg);
+      if (finishedChecks)
+         return;
+
+      isReadyToSwitchToToeOff(trailingLeg, footstepSoleFrame);
+   }
+
+   private boolean checkToeOffConditions(RobotSide trailingLeg)
+   {
+      if (!this.isDesiredICPOKForToeOff.getBooleanValue() || !this.isCurrentICPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
-         return;
+         return true;
+      }
+
+      needToSwitchToToeOffForAnkleLimit.set(checkAnkleLimitForToeOff(trailingLeg));
+      if (needToSwitchToToeOffForAnkleLimit.getBooleanValue())
+      {
+         doToeOff.set(true);
+         return true;
       }
 
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
-         return;
+         return true;
       }
 
-      isReadyToSwitchToToeOff(trailingLeg);
+      return false;
    }
 
    private boolean checkAnkleLimitForToeOff(RobotSide trailingLeg)
@@ -303,11 +352,8 @@ public class WalkOnTheEdgesManager
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
    }
 
-   private void isReadyToSwitchToToeOff(RobotSide trailingLeg)
+   private void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      RobotSide leadingLeg = trailingLeg.getOppositeSide();
-      ReferenceFrame frontFootFrame = feet.get(leadingLeg).getFrameAfterParentJoint();
-
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
       {
          doToeOff.set(false);
@@ -413,6 +459,9 @@ public class WalkOnTheEdgesManager
       isDesiredECMPOKForToeOff.set(false);
       isDesiredICPOKForToeOff.set(false);
 
+      isRearAnklePitchHittingLimit.set(false);
+      isRearAnklePitchHittingLimitFilt.set(false);
+
       doToeOff.set(false);
    }
 
@@ -444,7 +493,6 @@ public class WalkOnTheEdgesManager
       middleToePoint.interpolate(toePoints[0], toePoints[1], 0.5);
    }
 
-   private final FrameConvexPolygon2d onToesSupportPolygon = new FrameConvexPolygon2d();
 
    private void updateOnToesSupportPolygon(RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon)
    {

@@ -132,7 +132,7 @@ public class JointPrivilegedConfigurationHandler
       {
          OneDoFJoint joint = oneDoFJoints[i];
          double qd = 2.0 * defaultConfigurationGain.getDoubleValue() * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
-         qd = MathTools.clipToMinMax(qd, defaultMaxVelocity.getDoubleValue());
+         qd = MathTools.clamp(qd, defaultMaxVelocity.getDoubleValue());
          privilegedVelocities.set(i, 0, qd);
          yoJointPrivilegedVelocities.get(joint).set(qd);
       }
@@ -151,7 +151,7 @@ public class JointPrivilegedConfigurationHandler
          OneDoFJoint joint = oneDoFJoints[i];
          double qdd = 2.0 * privilegedConfigurationGains.get(i, 0) * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
          qdd -= privilegedVelocityGains.get(i, 0) * joint.getQd();
-         qdd = MathTools.clipToMinMax(qdd, privilegedMaxAccelerations.get(i, 0));
+         qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(i, 0));
          privilegedAccelerations.set(i, 0, qdd);
          yoJointPrivilegedAccelerations.get(joint).set(qdd);
       }
