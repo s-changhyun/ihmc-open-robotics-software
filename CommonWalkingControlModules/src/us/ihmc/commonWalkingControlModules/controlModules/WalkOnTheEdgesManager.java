@@ -43,6 +43,7 @@ public class WalkOnTheEdgesManager
    private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
    private final DoubleYoVariable icpProximityToLeadingFootForDSToeOff = new DoubleYoVariable("icpProximityToLeadingFootForDSToeOff", registry);
    private final DoubleYoVariable icpProximityToLeadingFootForSSToeOff = new DoubleYoVariable("icpProximityToLeadingFootForSSToeOff", registry);
+   private final DoubleYoVariable icpPercentOfStanceForDSToeOff = new DoubleYoVariable("icpPercentOfStanceForDSToeOff", registry);
    private final DoubleYoVariable icpPercentOfStanceForSSToeOff = new DoubleYoVariable("icpPercentOfStanceForSSToeOff", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
@@ -100,7 +101,7 @@ public class WalkOnTheEdgesManager
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
 
       this.ankleLowerLimitToTriggerToeOff.set(walkingControllerParameters.getAnkleLowerLimitToTriggerToeOff());
-      this.icpProximityToLeadingFootForDSToeOff.set(walkingControllerParameters.getICPProximityToLeadingFootForToeOff());
+      this.icpPercentOfStanceForDSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForDSToeOff());
       this.icpPercentOfStanceForSSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForSSToeOff());
 
       this.toeOffHelper = toeOffHelper;
@@ -289,9 +290,9 @@ public class WalkOnTheEdgesManager
    {
       double proximityState;
       if (isInSingleSupport.getBooleanValue())
-         proximityState = icpProximityToLeadingFootForSSToeOff.getDoubleValue();
+         proximityState = icpPercentOfStanceForDSToeOff.getDoubleValue();
       else
-         proximityState = icpProximityToLeadingFootForDSToeOff.getDoubleValue();
+         proximityState = icpPercentOfStanceForSSToeOff.getDoubleValue();
 
       boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
       if (proximityState > 0.0)
@@ -334,6 +335,18 @@ public class WalkOnTheEdgesManager
       }
       else
       {
+         ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
+         ReferenceFrame footstepSoleFrame = feet.get(trailingLeg.getOppositeSide()).getFrameAfterParentJoint();
+         tempLeadingFootPosition.setToZero(footstepSoleFrame);
+         tempTrailingFootPosition.setToZero(trailingFootFrame);
+         tempLeadingFootPosition.changeFrame(trailingFootFrame);
+
+         toLeadingFoot.setToZero(trailingFootFrame);
+         toLeadingFoot.set(tempLeadingFootPosition);
+         toLeadingFoot.sub(tempTrailingFootPosition);
+
+         icpProximityToLeadingFootForDSToeOff.set(icpPercentOfStanceForDSToeOff.getDoubleValue() * toLeadingFoot.length());
+
          return icpProximityToLeadingFootForDSToeOff.getDoubleValue();
       }
    }

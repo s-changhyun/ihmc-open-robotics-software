@@ -1117,9 +1117,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public double getICPProximityToLeadingFootForToeOff()
+   public double getICPPercentOfStanceForDSToeOff()
    {
-      return 0.05;
+      return 0.5;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getICPPercentOfStanceForSSToeOff()
+   {
+      return 0.5;
    }
 
    /** {@inheritDoc} */
