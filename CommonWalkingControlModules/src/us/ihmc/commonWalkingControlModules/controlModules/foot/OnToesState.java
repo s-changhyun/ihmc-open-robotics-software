@@ -7,7 +7,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -60,11 +59,6 @@ public class OnToesState extends AbstractFootControlState
 
    private final TwistCalculator twistCalculator;
 
-   // For privileged configuration commands
-   private final DoubleYoVariable privilegedWeight;
-   private final DoubleYoVariable privilegedConfigurationGain;
-   private final DoubleYoVariable privilegedVelocityGain;
-
    public OnToesState(FootControlHelper footControlHelper, ToeOffHelper toeOffHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
@@ -111,14 +105,6 @@ public class OnToesState extends AbstractFootControlState
          MatrixTools.removeRow(selectionMatrix, 3); // Remove linear part
       MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
-
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = footControlHelper.getWalkingControllerParameters().getJointPrivilegedConfigurationParameters();
-      privilegedWeight = new DoubleYoVariable(namePrefix + "PrivilegedWeight", registry);
-      privilegedConfigurationGain = new DoubleYoVariable(namePrefix + "PrivilegedConfigurationGain", registry);
-      privilegedVelocityGain = new DoubleYoVariable(namePrefix + "PrivilegedVelocityGain", registry);
-      privilegedWeight.set(jointPrivilegedConfigurationParameters.getOnToesKneeWeight());
-      privilegedConfigurationGain.set(jointPrivilegedConfigurationParameters.getOnToesKneeConfigurationGain());
-      privilegedVelocityGain.set(jointPrivilegedConfigurationParameters.getOnToesKneeVelocityGain());
    }
 
    public void setWeight(double weight)
@@ -242,14 +228,6 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      straightLegsPrivilegedConfigurationCommand.setWeight(privilegedWeight.getDoubleValue());
-      straightLegsPrivilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      straightLegsPrivilegedConfigurationCommand.setVelocityGain(privilegedVelocityGain.getDoubleValue());
-
-      bentLegsPrivilegedConfigurationCommand.setWeight(privilegedWeight.getDoubleValue());
-      bentLegsPrivilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      bentLegsPrivilegedConfigurationCommand.setVelocityGain(privilegedVelocityGain.getDoubleValue());
-
       if (attemptToStraightenLegs)
          return straightLegsPrivilegedConfigurationCommand;
       else
