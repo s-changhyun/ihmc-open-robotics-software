@@ -230,11 +230,11 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getCapturePoint(currentICP);
          balanceManager.getDesiredICP(desiredICP);
+         balanceManager.getNextExitCMP(nextExitCMP);
 
-         if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, desiredCMP, currentICP, desiredICP, balanceManager.isOnExitCMP()))
+         if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, nextExitCMP, desiredCMP, currentICP, desiredICP))
          {
             momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(supportSide), filteredDesiredCoP);
-            balanceManager.getNextExitCMP(nextExitCMP);
 
             feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(supportSide);
